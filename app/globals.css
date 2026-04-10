@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: only light;
+}
+
+body {
+  @apply bg-linen text-espresso font-sans;
+}
+
+::selection {
+  background: rgba(199, 165, 113, 0.35);
+}
+
+.section-label {
+  @apply uppercase tracking-[0.2em] text-[0.72rem] md:text-xs text-cafe;
+}
+
+.display-title {
+  @apply font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-espresso;
+}
+
+.editorial-divider {
+  @apply h-px w-full bg-espresso/10;
+}
+
+.lux-card {
+  @apply rounded-[32px] border border-latte bg-white/75 shadow-card;
+  backdrop-filter: blur(8px);
+}
+
+.lux-chip {
+  @apply inline-flex items-center rounded-full border border-latte bg-white/85 px-4 py-1 text-[0.72rem] md:text-xs uppercase tracking-[0.2em] text-espresso/70;
+}
+
+.rich-text p {
+  @apply text-[1.04rem] leading-relaxed text-espresso/80;
+}
+
+.rich-text p + p {
+  @apply mt-4;
+}
+
+.card-gradient {
+  background: linear-gradient(140deg, rgba(251, 247, 240, 0.95), rgba(241, 230, 220, 0.9));
+}
