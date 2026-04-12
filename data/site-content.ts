@@ -108,10 +108,22 @@ type OfferCard = {
   highlights: string[];
 };
 
+type MenuItem = {
+  name: string;
+  detail: string;
+};
+
+type MenuSubsection = {
+  title: string;
+  description?: string;
+  items: MenuItem[];
+};
+
 type MenuSection = {
   title: string;
   description: string;
-  items: { name: string; detail: string }[];
+  items: MenuItem[];
+  subsections?: MenuSubsection[];
 };
 
 type PageContent = {
@@ -325,33 +337,81 @@ export const content: Record<Locale, PageContent> = {
     },
     menuPage: {
       title: "Menu & carte",
-      intro: "Une carte courte, évolutive et parfaitement saisonnière. Toutes nos créations sont préparées chaque matin sur place.",
+      intro: "Une carte pensée avec soin, où pâtisseries fines, saveurs salées et café de spécialité se rencontrent.",
       sections: [
         {
-          title: "Pâtisseries",
-          description: "Éclairs signature, entremets, tartes de saison.",
+          title: "Sucré",
+          description: "Pâtisseries de la maison, réalisées avec exigence et sens du détail.",
           items: [
-            { name: "Éclair café-caramel", detail: "Crème légère, glaçage caramel" },
-            { name: "Tarte citron & yuzu", detail: "Meringue soyeuse, base sablée" },
-            { name: "Saint-honoré revisité", detail: "Crème vanille, choux croustillants" }
+            { name: "Crème brûlée", detail: "Une crème brûlée classique parfumée à la vanille." },
+            { name: "L'amour", detail: "Mousse au chocolat noir, cœur framboise et croustillant aux fruits rouges." },
+            { name: "Comme un Snickers", detail: "Mousse au chocolat noir et caramel aux cacahuètes, biscuit au chocolat noir et glaçage au chocolat au lait." },
+            { name: "Cœur chocolat vegan", detail: "Une mousse au chocolat avec des éclats de chocolat noir." },
+            { name: "Galet de Laponie", detail: "La pâtisserie signature avec des baies de la saison." },
+            { name: "Flan parisien", detail: "Parfumé à la vanille de Madagascar et une base de pâte à croissant maison." }
           ]
         },
         {
-          title: "Viennoiseries",
-          description: "Beurre AOP, feuilletage maison.",
+          title: "Salé",
+          description: "Une sélection salée maison, généreuse et soignée.",
           items: [
-            { name: "Croissant pur beurre", detail: "Feuilletage doré" },
-            { name: "Pain au chocolat", detail: "Chocolat noir 70%" },
-            { name: "Brioche aux agrumes", detail: "Zeste de citron" }
+            { name: "Croque monsieur jambon fromage", detail: "Pain au levain, sauce fromage de Kuusamon Juusto, emmental de Kuusamon Juusto et jambon de qualité." },
+            { name: "Croque monsieur à la truffe italienne", detail: "Pain au levain, sauce au fromage de Kuusamon Juusto, emmental de Kuusamon Juusto et sauce à la truffe italienne." },
+            { name: "Quiche au jambon", detail: "Jambon et fromage de Kuusamon Juusto, une base de pâte feuilletée fine." },
+            { name: "Quiche végétarienne", detail: "Des légumes de saison avec fromage de Kuusamon Juusto, une base de pâte feuilletée fine." },
+            { name: "Tarte à l'oignon", detail: "Une tarte végétarienne avec des oignons cuits et pickles, servie avec un aïoli." },
+            { name: "Saaristolainen", detail: "Pain noir sans gluten maison, fromage bleu Aura monté avec de la betterave en deux façons." },
+            { name: "Croque monsieur sans gluten", detail: "Pain de mie sans gluten, sauce fromage de Kuusamon Juusto, emmental de Kuusamon Juusto et jambon." }
           ]
         },
         {
-          title: "Boissons chaudes",
-          description: "Café de spécialité et thés premium.",
-          items: [
-            { name: "Espresso", detail: "Torréfaction locale" },
-            { name: "Latte noisette", detail: "Sirop maison" },
-            { name: "Thé blanc jasmin", detail: "Sélection rare" }
+          title: "Boissons",
+          description: "Une carte pensée pour les amateurs de café, où l'espresso et les boissons lactées occupent une place centrale.",
+          items: [],
+          subsections: [
+            {
+              title: "Café de spécialité",
+              description: "Nos cafés sont préparés avec exigence pour révéler l'équilibre, la texture et les arômes de chaque tasse.",
+              items: [
+                { name: "Espresso", detail: "" },
+                { name: "Double espresso", detail: "" },
+                { name: "Americano", detail: "" },
+                { name: "Décaféiné", detail: "" }
+              ]
+            },
+            {
+              title: "Boissons lactées",
+              description: "Des boissons espresso lactées préparées avec soin, dans un esprit gourmand et équilibré.",
+              items: [
+                { name: "Cappuccino", detail: "" },
+                { name: "Latte", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Latte vanille", detail: "" },
+                { name: "Latte caramel", detail: "" }
+              ]
+            },
+            {
+              title: "Thés & autres boissons chaudes",
+              description: "Une sélection de thés choisis avec soin pour compléter notre univers boissons.",
+              items: [
+                { name: "Vaste sélection de thés recommandés par Kofeiinikompania", detail: "" },
+                { name: "Matcha latte", detail: "" },
+                { name: "Chai latte", detail: "" },
+                { name: "Chocolat chaud gourmand", detail: "" }
+              ]
+            },
+            {
+              title: "Boissons froides",
+              description: "Des boissons froides gourmandes et rafraîchissantes, pensées dans le même esprit de qualité.",
+              items: [
+                { name: "Kinuski", detail: "" },
+                { name: "Vanilja-kookos", detail: "" },
+                { name: "Minttusuklaa", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Caramel latte", detail: "" },
+                { name: "Vanilja latte", detail: "" }
+              ]
+            }
           ]
         }
       ]
@@ -528,33 +588,81 @@ export const content: Record<Locale, PageContent> = {
     },
     menuPage: {
       title: "Menu",
-      intro: "A concise, evolving menu crafted every morning in-house with seasonal ingredients.",
+      intro: "A carefully curated selection where fine pastries, savoury dishes and specialty coffee meet.",
       sections: [
         {
-          title: "Patisserie",
-          description: "Signature éclairs, entremets and seasonal tarts.",
+          title: "Sweet",
+          description: "House-made pastries crafted with precision and attention to detail.",
           items: [
-            { name: "Coffee-caramel éclair", detail: "Light cream, caramel glaze" },
-            { name: "Lemon & yuzu tart", detail: "Silky meringue, sable base" },
-            { name: "Modern Saint-Honoré", detail: "Vanilla cream, crisp choux" }
+            { name: "Crème brûlée", detail: "A classic vanilla-infused crème brûlée." },
+            { name: "L'Amour", detail: "Dark chocolate mousse, raspberry heart and red fruit crisp." },
+            { name: "Like a Snickers", detail: "Dark chocolate and peanut caramel mousse, dark chocolate biscuit and milk chocolate glaze." },
+            { name: "Vegan chocolate heart", detail: "Chocolate mousse with dark chocolate chunks." },
+            { name: "Lapland pebble", detail: "Our signature pastry with seasonal berries." },
+            { name: "Parisian flan", detail: "Flavoured with Madagascar vanilla on a house-made croissant dough base." }
           ]
         },
         {
-          title: "Viennoiseries",
-          description: "AOP butter, in-house lamination.",
+          title: "Savory",
+          description: "A generous and refined selection of house-made savoury dishes.",
           items: [
-            { name: "Butter croissant", detail: "Golden layers" },
-            { name: "Pain au chocolat", detail: "70% dark chocolate" },
-            { name: "Citrus brioche", detail: "Lemon zest" }
+            { name: "Ham & cheese croque monsieur", detail: "Sourdough bread, Kuusamon Juusto cheese sauce, Kuusamon Juusto emmental and quality ham." },
+            { name: "Italian truffle croque monsieur", detail: "Sourdough bread, Kuusamon Juusto cheese sauce, Kuusamon Juusto emmental and Italian truffle sauce." },
+            { name: "Ham quiche", detail: "Ham and Kuusamon Juusto cheese on a fine puff pastry base." },
+            { name: "Vegetarian quiche", detail: "Seasonal vegetables with Kuusamon Juusto cheese on a fine puff pastry base." },
+            { name: "Onion tart", detail: "A vegetarian tart with cooked onions and pickles, served with aioli." },
+            { name: "Saaristolainen", detail: "House-made gluten-free dark bread, whipped Aura blue cheese with beetroot two ways." },
+            { name: "Gluten-free croque monsieur", detail: "Gluten-free bread, Kuusamon Juusto cheese sauce, Kuusamon Juusto emmental and ham." }
           ]
         },
         {
-          title: "Hot drinks",
-          description: "Specialty coffee and premium teas.",
-          items: [
-            { name: "Espresso", detail: "Local roast" },
-            { name: "Hazelnut latte", detail: "House syrup" },
-            { name: "Jasmine white tea", detail: "Rare selection" }
+          title: "Drinks",
+          description: "A menu designed for coffee lovers, where espresso and milk-based drinks take centre stage.",
+          items: [],
+          subsections: [
+            {
+              title: "Specialty coffee",
+              description: "Our coffees are prepared with precision to reveal the balance, texture and aromas of every cup.",
+              items: [
+                { name: "Espresso", detail: "" },
+                { name: "Double espresso", detail: "" },
+                { name: "Americano", detail: "" },
+                { name: "Decaf", detail: "" }
+              ]
+            },
+            {
+              title: "Milk-based drinks",
+              description: "Espresso and milk drinks prepared with care in a gourmet yet balanced spirit.",
+              items: [
+                { name: "Cappuccino", detail: "" },
+                { name: "Latte", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Vanilla latte", detail: "" },
+                { name: "Caramel latte", detail: "" }
+              ]
+            },
+            {
+              title: "Teas & other hot drinks",
+              description: "A thoughtful selection of teas to complement our drinks menu.",
+              items: [
+                { name: "Wide selection of teas recommended by Kofeiinikompania", detail: "" },
+                { name: "Matcha latte", detail: "" },
+                { name: "Chai latte", detail: "" },
+                { name: "Gourmet hot chocolate", detail: "" }
+              ]
+            },
+            {
+              title: "Cold drinks",
+              description: "Refreshing gourmet cold drinks crafted with the same quality spirit.",
+              items: [
+                { name: "Kinuski", detail: "" },
+                { name: "Vanilja-kookos", detail: "" },
+                { name: "Minttusuklaa", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Caramel latte", detail: "" },
+                { name: "Vanilja latte", detail: "" }
+              ]
+            }
           ]
         }
       ]
@@ -731,33 +839,81 @@ export const content: Record<Locale, PageContent> = {
     },
     menuPage: {
       title: "Menu",
-      intro: "Lyhyt ja kausittain elävä menu, joka valmistetaan joka aamu paikan päällä.",
+      intro: "Huolellisesti kuratoitu valikoima, jossa hienot leivonnaiset, suolaiset herkut ja erikoiskahvi kohtaavat.",
       sections: [
         {
-          title: "Patisserie",
-          description: "Signature-éclairit, entremet ja sesonkitortut.",
+          title: "Makea",
+          description: "Talon leivonnaiset, jotka valmistetaan tarkkuudella ja huolella.",
           items: [
-            { name: "Kahvi-karamelli éclair", detail: "Kevyt crema, karamellikuorrute" },
-            { name: "Sitruuna-yuzu torttu", detail: "Samettinen marenki" },
-            { name: "Moderni Saint-Honoré", detail: "Vaniljakerma, rapeat chouxit" }
+            { name: "Crème brûlée", detail: "Klassinen vaniljalla maustettu crème brûlée." },
+            { name: "L'Amour", detail: "Tumma suklaamousse, vadelmasydän ja punaiset marjat crispy." },
+            { name: "Kuin Snickers", detail: "Tumma suklaa- ja maapähkinäkaramellimousse, tumman suklaan keksi ja maitosuklaakuorrute." },
+            { name: "Vegaaninen suklaasydän", detail: "Suklaamousse tumman suklaan paloilla." },
+            { name: "Lapin kivi", detail: "Talon signature-leivonnainen kauden marjoilla." },
+            { name: "Pariisilainen flan", detail: "Madagaskarin vaniljalla maustettu talon croissant-taikinapohjalla." }
           ]
         },
         {
-          title: "Viennoiseriet",
-          description: "AOP-voita, oma laminointi.",
+          title: "Suolainen",
+          description: "Runsas ja hienostunut valikoima talon suolaisia herkkuja.",
           items: [
-            { name: "Voicroissant", detail: "Kultainen lehteys" },
-            { name: "Pain au chocolat", detail: "70% tumma suklaa" },
-            { name: "Sitrusbriossi", detail: "Sitruunankuori" }
+            { name: "Kinkku-juustocroque monsieur", detail: "Juurileipä, Kuusamon Juuston juustokastike, Kuusamon Juuston emmental ja laadukas kinkku." },
+            { name: "Italialainen tryffelicroque monsieur", detail: "Juurileipä, Kuusamon Juuston juustokastike, Kuusamon Juuston emmental ja italialainen tryffelikastike." },
+            { name: "Kinkkuquiche", detail: "Kinkku ja Kuusamon Juuston juusto ohuella voitaikinapohjalla." },
+            { name: "Kasvisquiche", detail: "Kauden kasvikset Kuusamon Juuston juustolla ohuella voitaikinapohjalla." },
+            { name: "Sipulipiirakka", detail: "Kasvispiirakka kypsennettyjä sipuleita ja pickles, tarjoillaan aiolin kera." },
+            { name: "Saaristolainen", detail: "Talon gluteeniton tumma leipä, vatkattu Aura sinihomejuusto punajuurella kahdella tavalla." },
+            { name: "Gluteeniton croque monsieur", detail: "Gluteeniton leipä, Kuusamon Juuston juustokastike, Kuusamon Juuston emmental ja kinkku." }
           ]
         },
         {
-          title: "Kuumat juomat",
-          description: "Erikoiskahvi ja premium-teet.",
-          items: [
-            { name: "Espresso", detail: "Paikallinen paahto" },
-            { name: "Hasselpähkinä latte", detail: "Talon siirappi" },
-            { name: "Jasmiini valkoinen tee", detail: "Harvinainen valinta" }
+          title: "Juomat",
+          description: "Kahvin ystäville suunniteltu menu, jossa espresso ja maitopohjaiset juomat ovat keskiössä.",
+          items: [],
+          subsections: [
+            {
+              title: "Erikoiskahvi",
+              description: "Kahvimme valmistetaan tarkkuudella jokaisen kupin tasapainon, rakenteen ja aromien paljastamiseksi.",
+              items: [
+                { name: "Espresso", detail: "" },
+                { name: "Double espresso", detail: "" },
+                { name: "Americano", detail: "" },
+                { name: "Kofeiiniton", detail: "" }
+              ]
+            },
+            {
+              title: "Maitopohjaiset juomat",
+              description: "Huolella valmistetut espresso-maitojuomat gourmet-henkisessä ja tasapainoisessa hengessä.",
+              items: [
+                { name: "Cappuccino", detail: "" },
+                { name: "Latte", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Vanilja latte", detail: "" },
+                { name: "Karamelli latte", detail: "" }
+              ]
+            },
+            {
+              title: "Teet & muut kuumat juomat",
+              description: "Huolellisesti valittu valikoima teitä täydentämään juomavalikoimaamme.",
+              items: [
+                { name: "Laaja valikoima Kofeiinikompanian suosittelemia teitä", detail: "" },
+                { name: "Matcha latte", detail: "" },
+                { name: "Chai latte", detail: "" },
+                { name: "Gourmet-kaakao", detail: "" }
+              ]
+            },
+            {
+              title: "Kylmät juomat",
+              description: "Ravistavat gourmet-kylmät juomat samalla laatuhenkellä valmistettuina.",
+              items: [
+                { name: "Kinuski", detail: "" },
+                { name: "Vanilja-kookos", detail: "" },
+                { name: "Minttusuklaa", detail: "" },
+                { name: "Mocha", detail: "" },
+                { name: "Karamelli latte", detail: "" },
+                { name: "Vanilja latte", detail: "" }
+              ]
+            }
           ]
         }
       ]

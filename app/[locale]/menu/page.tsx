@@ -52,14 +52,42 @@ export default function MenuPage({ params }: { params: { locale: Locale } }) {
         {content.menuPage.sections.map((section) => (
           <div key={section.title} className="rounded-3xl border border-latte bg-white/80 p-8 shadow-card">
             <SectionTitle title={section.title} description={section.description} />
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {section.items.map((item) => (
-                <div key={item.name} className="rounded-2xl border border-latte/60 bg-linen px-4 py-3">
-                  <p className="font-medium text-espresso">{item.name}</p>
-                  <p className="text-[0.98rem] text-espresso/70">{item.detail}</p>
-                </div>
-              ))}
-            </div>
+
+            {/* Items directes (Sucré, Salé) */}
+            {section.items.length > 0 && (
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                {section.items.map((item) => (
+                  <div key={item.name} className="rounded-2xl border border-latte/60 bg-linen px-4 py-3">
+                    <p className="font-medium text-espresso">{item.name}</p>
+                    <p className="text-[0.98rem] text-espresso/70">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Sous-sections (Boissons) */}
+            {section.subsections && section.subsections.length > 0 && (
+              <div className="mt-8 space-y-8">
+                {section.subsections.map((subsection, index) => (
+                  <div key={subsection.title} className={`${index > 0 ? 'pt-8 border-t border-latte/40' : ''}`}>
+                    <div className="mb-4">
+                      <h3 className="font-serif text-2xl text-espresso">{subsection.title}</h3>
+                      {subsection.description && (
+                        <p className="text-[1rem] text-espresso/70 mt-1">{subsection.description}</p>
+                      )}
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      {subsection.items.map((item) => (
+                        <div key={item.name} className="rounded-xl border border-latte/60 bg-linen px-4 py-3">
+                          <p className="font-medium text-espresso">{item.name}</p>
+                          {item.detail && <p className="text-[0.95rem] text-espresso/70">{item.detail}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </section>

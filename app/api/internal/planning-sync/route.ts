@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import {
   PlanningSyncPayload,
   validatePlanningPayload,
-  writePlanningHighlights
+  writePlanningHighlights,
+  readPlanningHighlights
 } from "../../../../lib/planning-highlights";
 
 const getTokenFromRequest = (request: Request) => {
@@ -11,12 +12,27 @@ const getTokenFromRequest = (request: Request) => {
   return authHeader.slice(7).trim();
 };
 
+// GET de test pour vérifier que la route existe
+export async function GET() {
+  const data = await readPlanningHighlights();
+  return NextResponse.json({ ok: true, generatedAt: data.generatedAt, count: data.highlights.length });
+}
+
 export async function POST(request: Request) {
   const expectedToken = process.env.PLANNING_SYNC_TOKEN;
   const token = getTokenFromRequest(request);
 
-  if (!expectedToken || token !== expectedToken) {
-    console.warn("[planning-sync] Unauthorized attempt");
+  // Logs de diagnostic (à retirer après validation)
+  console.log("[planning-sync] Token configuré:", expectedToken ? "OUI" : "NON");
+  console.log("[planning-sync] Token reçu:", token ? "OUI (longueur: " + token.length + ")" : "NON");
+
+  if (!expectedToken) {
+    console.error("[planning-sync] PLANNING_SYNC_TOKEN non configuré dans .env.local");
+    return NextResponse.json({ error: "Server misconfigured: token not set" }, { status: 500 });
+  }
+
+  if (token !== expectedToken) {
+    console.warn("[planning-sync] Token mismatch");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
