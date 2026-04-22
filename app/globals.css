@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: only light;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-linen text-espresso font-sans antialiased selection:bg-gold selection:text-white;
+}
+
+::selection {
+  background: rgba(197, 164, 126, 0.5);
+  color: #121212;
+}
+
+.section-label {
+  @apply uppercase tracking-[0.3em] text-[0.65rem] md:text-xs text-cafe/80 font-medium;
+}
+
+.display-title {
+  @apply font-serif text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] leading-[0.9] text-espresso tracking-tight;
+}
+
+.display-title-italic {
+  @apply font-serif italic font-light text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] leading-[0.9] text-espresso tracking-tight;
+}
+
+.editorial-divider {
+  @apply h-[1px] w-full bg-espresso/20;
+}
+
+.lux-card {
+  @apply rounded-none border border-espresso/10 bg-white/40 shadow-sm transition-all duration-500 hover:bg-white/60;
+  backdrop-filter: blur(12px);
+}
+
+.lux-chip {
+  @apply inline-flex items-center rounded-none border border-espresso/20 bg-transparent px-4 py-1.5 text-[0.65rem] md:text-xs uppercase tracking-[0.25em] text-espresso/80 transition-colors hover:bg-espresso hover:text-white;
+}
+
+.rich-text p {
+  @apply text-base md:text-lg leading-[1.8] text-espresso/70 font-light;
+}
+
+.rich-text p + p {
+  @apply mt-6;
+}
+
+.card-gradient {
+  background: linear-gradient(180deg, rgba(250, 249, 247, 0.95), rgba(242, 240, 234, 0.9));
+}
+
+.image-mask {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Custom scrollbar for an elegant touch */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f2f0ea; 
+}
+::-webkit-scrollbar-thumb {
+  background: #d9d0c5; 
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8f7c6b; 
+}
