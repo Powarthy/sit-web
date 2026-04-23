@@ -297,7 +297,7 @@ export const content: Record<Locale, PageContent> = {
         {
           title: "Boissons & café",
           description: "Espressos soignés, lattés créatifs et infusions haut de gamme.",
-          highlights: ["Torréfaction locale", "Lait nordique", "Service précis"]
+          highlights: ["Torréfaction nordique", "Lait nordique", "Service précis"]
         },
         {
           title: "Catering & commandes",
@@ -487,7 +487,7 @@ export const content: Record<Locale, PageContent> = {
       intro: "Tout ce dont vous avez besoin pour nous rendre visite ou nous confier votre prochaine commande.",
       methods: [
         { label: "Téléphone", value: "0504369455" },
-        { label: "Email", value: "bonjour@thefrenchcafe.fi" },
+        { label: "Email", value: "info@kahvilathefrench.cafe" },
         { label: "Adresse", value: "Kitkantie 2, 93600 Kuusamo, Finlande" }
       ],
       reservationTitle: "Réservation simple",
@@ -548,7 +548,7 @@ export const content: Record<Locale, PageContent> = {
         {
           title: "Coffee & beverages",
           description: "Carefully crafted espressos, lattes and premium infusions.",
-          highlights: ["Local roast", "Nordic dairy", "Precise service"]
+          highlights: ["Nordic roast", "Nordic dairy", "Precise service"]
         },
         {
           title: "Catering & orders",
@@ -738,7 +738,7 @@ export const content: Record<Locale, PageContent> = {
       intro: "Everything you need to visit us or plan your next order.",
       methods: [
         { label: "Phone", value: "0504369455" },
-        { label: "Email", value: "bonjour@thefrenchcafe.fi" },
+        { label: "Email", value: "info@kahvilathefrench.cafe" },
         { label: "Address", value: "Kitkantie 2, 93600 Kuusamo, Finland" }
       ],
       reservationTitle: "Easy reservations",
@@ -799,7 +799,7 @@ export const content: Record<Locale, PageContent> = {
         {
           title: "Kahvi & juomat",
           description: "Huolella tehdyt espressot, latet ja premium-haudukkeet.",
-          highlights: ["Paikallinen paahto", "Pohjoinen maito", "Tarkka palvelu"]
+          highlights: ["Lahdesta paahto", "Pohjoinen maito", "Tarkka palvelu"]
         },
         {
           title: "Catering & tilaukset",
@@ -989,7 +989,7 @@ export const content: Record<Locale, PageContent> = {
       intro: "Kaikki tarvittava vierailuun tai seuraavan tilauksen suunnitteluun.",
       methods: [
         { label: "Puhelin", value: "0504369455" },
-        { label: "Sähköposti", value: "bonjour@thefrenchcafe.fi" },
+        { label: "Sähköposti", value: "info@kahvilathefrench.cafe" },
         { label: "Osoite", value: "Kitkantie 2, 93600 Kuusamo, Suomi" }
       ],
       reservationTitle: "Helppo varaus",
