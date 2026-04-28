@@ -6,7 +6,7 @@ export const defaultLocale: Locale = "fr";
 export const siteSettings = {
   name: "The French Café",
   location: "Kuusamo, Finlande",
-  siteUrl: "https://thefrenchcafe.fi",
+  siteUrl: "https://kahvilathefrench.cafe",
   address: "Kitkantie 2, 93600 Kuusamo, Finlande",
   phone: "0504369455",
   email: "info@kahvilathefrench.cafe",
