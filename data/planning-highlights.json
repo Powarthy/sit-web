@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-04-16T15:19:54.969Z",
+  "highlights": [
+    {
+      "id": "happy-hour-2d",
+      "showOnWebsite": true,
+      "types": [
+        "happy_hour"
+      ],
+      "title": "Happy hour cette semaine",
+      "shortText": "2 jours",
+      "startDate": "2026-04-18",
+      "endDate": "2026-04-18",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "announcement-20d",
+      "showOnWebsite": true,
+      "types": [
+        "announcement"
+      ],
+      "title": "Annonce lointaine",
+      "shortText": "Trop loin",
+      "startDate": "2026-05-06",
+      "endDate": "2026-05-06",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "closure-1d",
+      "showOnWebsite": true,
+      "types": [
+        "closure"
+      ],
+      "title": "Fermeture demain",
+      "shortText": "Demain",
+      "startDate": "2026-04-17",
+      "endDate": "2026-04-17",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "seasonal-5d",
+      "showOnWebsite": true,
+      "types": [
+        "seasonal_special"
+      ],
+      "title": "Spécial saison",
+      "shortText": "Dans 5 jours",
+      "startDate": "2026-04-21",
+      "endDate": "2026-04-21",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "brunch-past",
+      "showOnWebsite": true,
+      "types": [
+        "brunch"
+      ],
+      "title": "Brunch passé",
+      "shortText": "Déjà fini",
+      "startDate": "2026-04-13",
+      "endDate": "2026-04-13",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "brunch-today",
+      "showOnWebsite": true,
+      "types": [
+        "brunch"
+      ],
+      "title": "Brunch en cours",
+      "shortText": "Aujourd'hui",
+      "startDate": "2026-04-16",
+      "endDate": "2026-04-16",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "brunch-10d",
+      "showOnWebsite": true,
+      "types": [
+        "brunch"
+      ],
+      "title": "Brunch prochain",
+      "shortText": "Dans 10 jours",
+      "startDate": "2026-04-26",
+      "endDate": "2026-04-26",
+      "startTime": null,
+      "endTime": null
+    },
+    {
+      "id": "brunch-40d",
+      "showOnWebsite": true,
+      "types": [
+        "brunch"
+      ],
+      "title": "Brunch lointain",
+      "shortText": "Dans 40 jours",
+      "startDate": "2026-05-26",
+      "endDate": "2026-05-26",
+      "startTime": null,
+      "endTime": null
+    }
+  ]
+}
