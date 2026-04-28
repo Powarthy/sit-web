@@ -12,6 +12,8 @@ export type PlanningHighlight = {
   types: HighlightType[];
   title: string;
   shortText: string;
+  titleI18n?: Partial<Record<"fr" | "en" | "fi", string>>;
+  shortTextI18n?: Partial<Record<"fr" | "en" | "fi", string>>;
   startDate: string;
   endDate: string;
   startTime: string | null;
@@ -147,8 +149,8 @@ export const validatePlanningPayload = (payload: PlanningSyncPayload) => {
   return { isValid: errors.length === 0, errors };
 };
 
-const typeOrder: HighlightType[] = ["brunch", "happy_hour", "closure", "seasonal_special", "announcement"];
-const allowedWeeklyTypes: HighlightType[] = ["happy_hour", "closure", "seasonal_special", "announcement"];
+const typeOrder: HighlightType[] = ["brunch", "seasonal_special", "closure", "happy_hour", "announcement"];
+const allowedWeeklyTypes: HighlightType[] = ["happy_hour", "closure", "seasonal_special"];
 
 const parseDate = (value: string) => new Date(`${value}T00:00:00`);
 const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
@@ -166,6 +168,12 @@ const isWithinWindow = (highlight: PlanningHighlight, start: Date, end: Date) =>
   return startDate <= end && endDate >= start;
 };
 
+const getTypeRank = (highlight: PlanningHighlight) => {
+  const primaryType = getHighlightPrimaryType(highlight);
+  const index = primaryType ? typeOrder.indexOf(primaryType) : -1;
+  return index >= 0 ? index : typeOrder.length;
+};
+
 export const getWeeklyHighlights = async () => {
   const { highlights } = await readPlanningHighlights();
   const today = new Date();
@@ -177,7 +185,11 @@ export const getWeeklyHighlights = async () => {
     .filter((highlight) => highlight.showOnWebsite !== false)
     .filter((highlight) => highlight.types.some((type) => allowedWeeklyTypes.includes(type)))
     .filter((highlight) => isWithinWindow(highlight, todayStart, windowEnd))
-    .sort((a, b) => parseDate(a.startDate).getTime() - parseDate(b.startDate).getTime());
+    .sort((a, b) => {
+      const rankDiff = getTypeRank(a) - getTypeRank(b);
+      if (rankDiff !== 0) return rankDiff;
+      return parseDate(a.startDate).getTime() - parseDate(b.startDate).getTime();
+    });
 };
 
 export const getUpcomingBrunch = async () => {
@@ -197,6 +209,16 @@ export const getWebsiteHighlights = async () => {
   const [weekly, brunch] = await Promise.all([getWeeklyHighlights(), getUpcomingBrunch()]);
   return brunch ? [brunch, ...weekly] : weekly;
 };
+
+export const getLocalizedHighlightTitle = (
+  highlight: PlanningHighlight,
+  locale: "fr" | "en" | "fi"
+) => highlight.titleI18n?.[locale]?.trim() || highlight.title;
+
+export const getLocalizedHighlightShortText = (
+  highlight: PlanningHighlight,
+  locale: "fr" | "en" | "fi"
+) => highlight.shortTextI18n?.[locale]?.trim() || highlight.shortText;
 
 export const getCurrentHighlight = async () => {
   const highlights = await getWebsiteHighlights();

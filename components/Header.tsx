@@ -45,11 +45,11 @@ export default function Header({
         <span>{content.hero.badge}</span>
       </div>
 
-      <div className={`container flex items-center justify-between gap-6 transition-all duration-500 ${scrolled ? "py-4" : "py-6 md:py-8"}`}>
+      <div className={`container flex items-center justify-between gap-4 md:gap-6 transition-all duration-500 ${scrolled ? "py-4" : "py-6 md:py-8"}`}>
         
         {/* LOGO */}
         <div className="flex flex-col shrink-0">
-          <Link href={`/${locale}`} className="text-2xl md:text-3xl lg:text-4xl font-serif tracking-tight uppercase hover:opacity-80 transition-opacity text-espresso whitespace-nowrap">
+          <Link href={`/${locale}`} className="text-[1.35rem] sm:text-2xl md:text-3xl lg:text-4xl font-serif tracking-tight uppercase hover:opacity-80 transition-opacity text-espresso whitespace-nowrap">
             The French Café
           </Link>
         </div>
@@ -82,7 +82,8 @@ export default function Header({
         </div>
 
         {/* MOBILE NAVIGATION TOGGLE */}
-        <div className="flex lg:hidden items-center gap-4">
+        <div className="flex lg:hidden items-center gap-3 shrink-0">
+          <LanguageSwitcher currentLocale={locale} scrolled={scrolled} compact />
           <details className="group relative">
             <summary className={`flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.2em] font-medium cursor-pointer list-none border ${scrolled ? "border-espresso/20 text-espresso" : "border-espresso/30 text-espresso"} rounded-full`}>
               {locale === "fr" ? "Menu" : locale === "en" ? "Menu" : "Valikko"}
@@ -98,13 +99,6 @@ export default function Header({
                 ))}
               </nav>
 
-              {/* LANGUAGE SWITCHER */}
-              <div className="pt-6 border-t border-espresso/10">
-                <p className="mb-3 text-[0.65rem] uppercase tracking-[0.3em] text-cafe">
-                  {locale === "fr" ? "Langue" : locale === "en" ? "Language" : "Kieli"}
-                </p>
-                <LanguageSwitcher currentLocale={locale} scrolled={scrolled} />
-              </div>
               {/*
               <a
                 href={reservationUrl}

@@ -12,10 +12,12 @@ const localeLabels: Record<Locale, string> = {
 
 export default function LanguageSwitcher({ 
   currentLocale,
-  scrolled = false
+  scrolled = false,
+  compact = false
 }: { 
   currentLocale: Locale;
   scrolled?: boolean;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,12 +29,18 @@ export default function LanguageSwitcher({
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-latte bg-white/90 px-2.5 py-1.5 text-[11px] font-semibold tracking-[0.26em] uppercase text-espresso/70">
+    <div
+      className={`flex items-center rounded-full border border-latte bg-white/90 font-semibold uppercase text-espresso/70 ${
+        compact
+          ? "gap-1 px-1.5 py-1 text-[10px] tracking-[0.16em]"
+          : "gap-2 px-2.5 py-1.5 text-[11px] tracking-[0.26em]"
+      }`}
+    >
       {locales.map((locale) => (
         <Link
           key={locale}
           href={`/${locale}`}
-          className={`rounded-full px-2.5 py-1 transition ${
+          className={`rounded-full py-1 transition ${compact ? "px-2" : "px-2.5"} ${
             currentLocale === locale
               ? scrolled ? "bg-espresso text-cream shadow-soft" : "bg-espresso text-cream shadow-soft"
               : scrolled ? "text-espresso/60 hover:text-espresso" : "text-espresso/60 hover:text-espresso"

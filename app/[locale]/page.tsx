@@ -8,6 +8,8 @@ import FadeIn from "../../components/FadeIn";
 import SignatureSlider from "../../components/SignatureSlider";
 import {
   getHighlightPrimaryType,
+  getLocalizedHighlightShortText,
+  getLocalizedHighlightTitle,
   getUpcomingBrunch,
   getWeeklyHighlights
 } from "../../lib/planning-highlights";
@@ -101,48 +103,104 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
     getUpcomingBrunch()
   ]);
   const highlights = brunchHighlight ? [brunchHighlight, ...weeklyHighlights.slice(0, 3)] : weeklyHighlights.slice(0, 3);
-  const highlightItems = highlights.map((highlight) => {
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const windowEnd = new Date(todayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const dateLocale = params.locale === "fr" ? "fr-FR" : params.locale === "en" ? "en-GB" : "fi-FI";
+  const formatHighlightDate = (dateId: string, includeWeekday = false) => {
+    const date = new Date(`${dateId}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return dateId;
+    return date.toLocaleDateString(dateLocale, {
+      ...(includeWeekday ? { weekday: "long" as const } : {}),
+      day: "numeric",
+      month: "long"
+    });
+  };
+  const formatRange = (startDate: string, endDate: string) => {
+    const start = formatHighlightDate(startDate);
+    const end = formatHighlightDate(endDate);
+    if (startDate === endDate) return start;
+    if (params.locale === "en") return `From ${start} to ${end}`;
+    if (params.locale === "fi") return `${start} – ${end}`;
+    return `Du ${start} au ${end}`;
+  };
+  const formatClosureText = (startDate: string, endDate: string) => {
+    const start = formatHighlightDate(startDate, true);
+    const end = formatHighlightDate(endDate, true);
+    if (startDate === endDate) {
+      if (params.locale === "en") return `We will be closed on ${start}.`;
+      if (params.locale === "fi") return `Olemme suljettu ${start}.`;
+      return `Nous serons fermés le ${start}.`;
+    }
+    if (params.locale === "en") return `We will be closed from ${start} to ${end}.`;
+    if (params.locale === "fi") return `Olemme suljettu ${start} – ${end}.`;
+    return `Nous serons fermés du ${start} au ${end}.`;
+  };
+  const isInCurrentWindow = (startDate: string, endDate: string) => {
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    return !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && start <= windowEnd && end >= todayStart;
+  };
+  const brunchOpeningItem =
+    brunchHighlight && isInCurrentWindow(brunchHighlight.startDate, brunchHighlight.endDate)
+      ? {
+          label:
+            params.locale === "fr"
+              ? "Ouverture du café"
+              : params.locale === "en"
+                ? "Café opening"
+                : "Kahvilan aukiolo",
+          value:
+            params.locale === "fr"
+              ? "11:00 – 15:00 ce dimanche"
+              : params.locale === "en"
+                ? "Café open 11:00–15:00 this Sunday"
+                : "Kahvila avoinna tänä sunnuntaina klo 11:00–15:00"
+        }
+      : null;
+
+  const highlightItems = highlights.flatMap((highlight) => {
     const primaryType = getHighlightPrimaryType(highlight);
-    const highlightDate = new Date(`${highlight.startDate}T00:00:00`);
-    const formattedDate = Number.isNaN(highlightDate.getTime())
-      ? highlight.startDate
-      : highlightDate.toLocaleDateString(
-          params.locale === "fr" ? "fr-FR" : params.locale === "en" ? "en-GB" : "fi-FI",
-          { weekday: "long", day: "numeric", month: "long" }
-        );
+    const title = getLocalizedHighlightTitle(highlight, params.locale);
+    const shortText = getLocalizedHighlightShortText(highlight, params.locale);
+    const publicTitle =
+      primaryType === "brunch"
+        ? params.locale === "fr" ? "Brunch signature" : params.locale === "en" ? "Signature brunch" : "Signature-brunssi"
+        : primaryType === "happy_hour"
+          ? params.locale === "fr" ? "Happy hours le vendredi" : params.locale === "en" ? "Happy hours on Friday" : "Happy hours perjantaina"
+          : title;
+    const brunchText =
+      params.locale === "fr"
+        ? "2e dimanche · 10:45 & 12:45"
+        : params.locale === "en"
+          ? "2nd Sunday · 10:45 & 12:45"
+          : "Kuukauden 2. sunnuntai · 10:45 & 12:45";
 
     const value = (() => {
-      if (primaryType === "brunch") return formattedDate;
-      if (primaryType === "happy_hour") {
-        const range = highlight.startTime && highlight.endTime ? `${highlight.startTime}–${highlight.endTime}` : "";
-        const shortLower = highlight.shortText.toLowerCase();
-        const isGeneric = shortLower === "happy hour" || shortLower === "happy_hour";
-        const parts = [] as string[];
-        if (!isGeneric) parts.push(highlight.shortText);
-        if (formattedDate) parts.push(formattedDate);
-        if (range) parts.push(range);
-        return parts.join(" · ");
-      }
-      if (primaryType === "closure") return formattedDate;
-      return highlight.shortText;
+      if (primaryType === "brunch") return brunchText;
+      if (primaryType === "happy_hour") return publicTitle;
+      if (primaryType === "closure") return formatClosureText(highlight.startDate, highlight.endDate);
+      if (primaryType === "seasonal_special") return formatRange(highlight.startDate, highlight.endDate);
+      return shortText;
     })();
 
     const label =
       primaryType === "brunch"
-        ? params.locale === "fr" ? "Prochain brunch" : params.locale === "en" ? "Next brunch" : "Seuraava brunssi"
+        ? publicTitle
         : primaryType === "closure"
-          ? params.locale === "fr" ? "Fermeture exceptionnelle" : params.locale === "en" ? "Exceptional closure" : "Poikkeuksellinen sulku"
-          : highlight.title;
-    
-    const meta = primaryType === "brunch" && highlight.startTime && highlight.endTime ? `${highlight.startTime}–${highlight.endTime}` : undefined;
-    
-    return { label, value, meta };
-  }).filter((item) => {
-    if (item.label.toLowerCase().includes("happy")) return Boolean(item.value && item.value.trim().length > 0);
-    return true;
-  });
+          ? publicTitle
+          : primaryType === "seasonal_special"
+            ? publicTitle
+            : primaryType === "happy_hour"
+              ? params.locale === "fr" ? "Pause café" : params.locale === "en" ? "Coffee break" : "Kahvitauko"
+              : publicTitle;
 
-  const nowItems = highlightItems.length > 0 ? highlightItems : content.now.items;
+    const item = { label, value };
+    if (primaryType === "brunch" && brunchOpeningItem) return [item, brunchOpeningItem];
+    return [item];
+  }).filter((item) => Boolean(item.label?.trim() && item.value?.trim()));
+
+  const nowItems = highlightItems;
 
   return (
     <div className="bg-linen min-h-screen selection:bg-gold selection:text-white pb-24">
