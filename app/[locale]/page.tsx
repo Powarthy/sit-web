@@ -169,12 +169,13 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
         : primaryType === "happy_hour"
           ? params.locale === "fr" ? "Happy hours le vendredi" : params.locale === "en" ? "Happy hours on Friday" : "Happy hours perjantaina"
           : title;
+    const brunchDate = formatHighlightDate(highlight.startDate, true);
     const brunchText =
       params.locale === "fr"
-        ? "2e dimanche · 10:45 & 12:45"
+        ? `Prochain brunch le ${brunchDate} · 10:45 & 12:45`
         : params.locale === "en"
-          ? "2nd Sunday · 10:45 & 12:45"
-          : "Kuukauden 2. sunnuntai · 10:45 & 12:45";
+          ? `Next brunch on ${brunchDate} · 10:45 & 12:45`
+          : `Seuraava brunssi ${brunchDate} · 10:45 & 12:45`;
 
     const value = (() => {
       if (primaryType === "brunch") return brunchText;
