@@ -41,7 +41,7 @@ export default function AboutPage({ params }: { params: { locale: Locale } }) {
   const content = getLocaleContent(params.locale);
 
   const ctaLabels = {
-    house: params.locale === "fr" ? "Maison" : params.locale === "en" ? "House" : "Talo",
+    house: params.locale === "fr" ? "Maison" : params.locale === "en" ? "House" : "Notre maison",
     story: params.locale === "fr" ? "L'histoire" : params.locale === "en" ? "The story" : "Tarina",
     team: params.locale === "fr" ? "L'équipe" : params.locale === "en" ? "The team" : "Tiimi",
     vision: params.locale === "fr" ? "Vision" : params.locale === "en" ? "Vision" : "Visio",
@@ -178,15 +178,15 @@ export default function AboutPage({ params }: { params: { locale: Locale } }) {
               </div>
             </div>
 
-            <div className="bg-white p-10 md:p-16 lg:p-20 flex flex-col justify-center min-h-[400px]">
+            <div className="bg-white p-6 sm:p-10 md:p-16 lg:p-20 flex flex-col justify-center min-h-[400px]">
               <p className="section-label mb-6">{ctaLabels.values}</p>
-              <h3 className="font-serif text-4xl md:text-5xl mb-8">{content.aboutPage.valuesTitle}</h3>
+              <h3 className="font-serif text-4xl md:text-5xl mb-6 sm:mb-8">{content.aboutPage.valuesTitle}</h3>
               <div className="space-y-px bg-espresso/10">
                 {content.aboutPage.values.map((value, i) => (
-                  <div key={i} className="bg-linen py-4 px-6 text-espresso/80 font-light flex items-center justify-between">
-                    <span className="font-medium text-espresso">{value.title}</span>
-                    <span className="text-sm text-espresso/60 max-w-[200px] text-right">{value.description}</span>
-                    <ArrowDownRight className="w-4 h-4 text-gold flex-shrink-0" />
+                  <div key={i} className="bg-linen grid grid-cols-1 sm:grid-cols-[minmax(120px,150px)_minmax(0,1fr)_auto] gap-3 sm:gap-4 py-4 px-4 sm:px-5 md:px-6 text-espresso/80 font-light items-start sm:items-center">
+                    <span className="font-medium text-espresso break-words">{value.title}</span>
+                    <span className="min-w-0 text-sm text-espresso/60 leading-relaxed text-left sm:text-right sm:max-w-[320px] sm:justify-self-end break-words">{value.description}</span>
+                    <ArrowDownRight className="w-4 h-4 text-gold self-start sm:self-center mt-1 sm:mt-0" />
                   </div>
                 ))}
               </div>

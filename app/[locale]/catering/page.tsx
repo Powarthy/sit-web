@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageIntro from "../../../components/PageIntro";
 import SectionTitle from "../../../components/SectionTitle";
+import { TrackedAnchor } from "../../../components/TrackedLink";
 import {
   Locale,
   buildLocalizedUrl,
@@ -61,12 +62,14 @@ export default function CateringPage({ params }: { params: { locale: Locale } })
             <p className="text-cream/80 text-[1.02rem] leading-relaxed">{content.cateringPage.ctaDescription}</p>
           </div>
           <div className="flex flex-col gap-4">
-            <a
+            <TrackedAnchor
               href={`mailto:${siteSettings.email}`}
+              eventName="contact_clicked"
+              eventParams={{ language: params.locale, source: "catering_page", button_location: "cta_email" }}
               className="w-full sm:w-auto rounded-full bg-cream px-6 py-3 text-sm uppercase tracking-[0.2em] text-espresso text-center hover:bg-cream/90 transition"
             >
               {content.cateringPage.cta}
-            </a>
+            </TrackedAnchor>
             <p className="text-[0.75rem] text-cream/70">{siteSettings.email} · {siteSettings.phone}</p>
           </div>
         </div>

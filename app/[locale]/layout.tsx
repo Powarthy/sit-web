@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { locales, siteSettings, getLocaleContent, getLocaleNavigation, Locale } from "../../data/site-content";
+import { locales, siteSettings, getLocaleContent, getLocaleNavigation, localizedRoutes, Locale } from "../../data/site-content";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,7 +42,7 @@ export default function LocaleLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header locale={params.locale} navigation={navigation} reservationUrl={siteSettings.reservationUrl} />
+      <Header locale={params.locale} navigation={navigation} reservationUrl={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`} />
       <main className="flex-1">{children}</main>
       <Footer locale={params.locale} content={content.footer} />
     </div>

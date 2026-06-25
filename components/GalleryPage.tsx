@@ -59,7 +59,7 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
     eyebrow: "Galleria",
     title: "The French Café kuvina",
     description:
-      "Astu sisään leivonnaistemme, signature-kahviemme ja Kuusamon talomme lämpimään tunnelmaan. Napsauta kuvaa katsellaksesi sitä suurempana.",
+      "Astu sisään leivonnaisten, erikoiskahvien ja elämyksiin kahvilaan!",
     seoTitle: "Galleria | The French Café Kuusamo",
     seoDescription: "Tutustu The French Cafén leivonnaisiin, kahveihin ja tunnelmaan Kuusamossa visuaalisen gallerian kautta.",
     captions: [

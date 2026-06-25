@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import EventHighlight from "../../components/EventHighlight";
 import OfferCard from "../../components/OfferCard";
@@ -6,6 +5,7 @@ import OpeningHours from "../../components/OpeningHours";
 import SectionTitle from "../../components/SectionTitle";
 import FadeIn from "../../components/FadeIn";
 import SignatureSlider from "../../components/SignatureSlider";
+import { TrackedLink } from "../../components/TrackedLink";
 import {
   getHighlightPrimaryType,
   getLocalizedHighlightShortText,
@@ -64,20 +64,20 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
     reserve: params.locale === "fr" ? "Réserver" : params.locale === "en" ? "Reserve" : "Varaa",
     menu: params.locale === "fr" ? "Voir la carte" : params.locale === "en" ? "View menu" : "Katso menu",
     find: params.locale === "fr" ? "Nous trouver" : params.locale === "en" ? "Find us" : "Löydä meidät",
-    hours: params.locale === "fr" ? "Horaires" : params.locale === "en" ? "Hours" : "Aukiolo",
+    hours: params.locale === "fr" ? "Horaires" : params.locale === "en" ? "Hours" : "Palvelemme",
     today: params.locale === "fr" ? "Aujourd'hui" : params.locale === "en" ? "Today" : "Tänään",
     signature: params.locale === "fr" ? "Signature brunch" : params.locale === "en" ? "Signature brunch" : "Signature-brunssi",
-    house: params.locale === "fr" ? "Maison" : params.locale === "en" ? "House" : "Talo",
+    house: params.locale === "fr" ? "Maison" : params.locale === "en" ? "House" : "Notre maison",
     reservation: params.locale === "fr" ? "Réservation" : params.locale === "en" ? "Reservation" : "Varaus",
     address: params.locale === "fr" ? "Adresse" : params.locale === "en" ? "Address" : "Osoite",
-    contact: params.locale === "fr" ? "Contact" : params.locale === "en" ? "Contact" : "Yhteys",
+    contact: params.locale === "fr" ? "Contact" : params.locale === "en" ? "Contact" : "Puhelin",
     visit: params.locale === "fr" ? "Visite" : params.locale === "en" ? "Visit" : "Vierailu",
-    brunchTitle: params.locale === "fr" ? "Brunch & Pâtisserie" : params.locale === "en" ? "Brunch & Patisserie" : "Brunssi & Patisserie",
+    brunchTitle: params.locale === "fr" ? "Brunch & Pâtisserie" : params.locale === "en" ? "Brunch & Patisserie" : "Brunssi & Kahvila",
     brunchHours: params.locale === "fr" ? "Horaires" : params.locale === "en" ? "Hours" : "Aika",
     brunchPrice: params.locale === "fr" ? "Prix" : params.locale === "en" ? "Price" : "Hinta",
     signatureLabel: params.locale === "fr" ? "Signature" : params.locale === "en" ? "Signature" : "Signature",
     offerLabel: params.locale === "fr" ? "Savoir-faire" : params.locale === "en" ? "Savoir-faire" : "Osaaminen",
-    proofLabel: params.locale === "fr" ? "Réputation" : params.locale === "en" ? "Reputation" : "Maine",
+    proofLabel: params.locale === "fr" ? "Réputation" : params.locale === "en" ? "Reputation" : "Vahvuutemme",
     catering: params.locale === "fr" ? "Demander un devis" : params.locale === "en" ? "Request catering" : "Pyydä catering"
   };
 
@@ -110,6 +110,15 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
   const formatHighlightDate = (dateId: string, includeWeekday = false) => {
     const date = new Date(`${dateId}T00:00:00`);
     if (Number.isNaN(date.getTime())) return dateId;
+    if (params.locale === "fi" && includeWeekday) {
+      const weekday = date.toLocaleDateString("fi-FI", { weekday: "long" });
+      const weekdayWithSuffix = `${weekday}na`;
+      const datePart = date.toLocaleDateString("fi-FI", {
+        day: "numeric",
+        month: "long"
+      });
+      return `${weekdayWithSuffix} ${datePart}`;
+    }
     return date.toLocaleDateString(dateLocale, {
       ...(includeWeekday ? { weekday: "long" as const } : {}),
       day: "numeric",
@@ -172,10 +181,10 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
     const brunchDate = formatHighlightDate(highlight.startDate, true);
     const brunchText =
       params.locale === "fr"
-        ? `Prochain brunch le ${brunchDate} · 10:45 & 12:45`
+        ? `Prochain brunch le ${brunchDate}`
         : params.locale === "en"
-          ? `Next brunch on ${brunchDate} · 10:45 & 12:45`
-          : `Seuraava brunssi ${brunchDate} · 10:45 & 12:45`;
+          ? `Next brunch on ${brunchDate}`
+          : `Seuraava brunssi ${brunchDate}`;
 
     const value = (() => {
       if (primaryType === "brunch") return brunchText;
@@ -193,7 +202,7 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
           : primaryType === "seasonal_special"
             ? publicTitle
             : primaryType === "happy_hour"
-              ? params.locale === "fr" ? "Pause café" : params.locale === "en" ? "Coffee break" : "Kahvitauko"
+              ? params.locale === "fr" ? "Pause café" : params.locale === "en" ? "Coffee break" : "Tapahtumat"
               : publicTitle;
 
     const item = { label, value };
@@ -202,6 +211,7 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
   }).filter((item) => Boolean(item.label?.trim() && item.value?.trim()));
 
   const nowItems = highlightItems;
+  const brunchPriceValue = params.locale === "fi" ? "45 € / henkilö" : siteSettings.brunch.price;
 
   return (
     <div className="bg-linen min-h-screen selection:bg-gold selection:text-white pb-24">
@@ -232,18 +242,22 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
                   {content.hero.subhead}
                 </p>
                 <div className="flex gap-4 md:justify-end">
-                  <a
-                    href={siteSettings.reservationUrl}
+                  <TrackedLink
+                    href={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`}
+                    eventName="brunch_reservation_started"
+                    eventParams={{ language: params.locale, source: "home_hero", button_location: "hero_primary" }}
                     className="flex items-center justify-center bg-espresso text-white px-8 py-4 text-xs uppercase tracking-[0.25em] font-medium transition-all hover:bg-gold hover:text-white"
                   >
                     {content.hero.primaryCta}
-                  </a>
-                  <Link
+                  </TrackedLink>
+                  <TrackedLink
                     href={`/${params.locale}/menu`}
+                    eventName="menu_viewed"
+                    eventParams={{ language: params.locale, source: "home_hero", button_location: "hero_secondary" }}
                     className="flex items-center justify-center border border-espresso/30 bg-white text-espresso px-8 py-4 text-xs uppercase tracking-[0.25em] transition-all hover:bg-espresso/5 hover:border-espresso"
                   >
                     {content.hero.secondaryCta}
-                  </Link>
+                  </TrackedLink>
                 </div>
               </div>
             </div>
@@ -302,12 +316,14 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
               <p className="section-label mb-4">{ctaLabels.offerLabel}</p>
               <h2 className="display-title">{content.offers.title}</h2>
             </div>
-            <Link
+            <TrackedLink
               href={`/${params.locale}/menu`}
+              eventName="menu_viewed"
+              eventParams={{ language: params.locale, source: "home_offers", button_location: "offers_header" }}
               className="inline-flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-espresso hover:text-gold transition-colors font-medium"
             >
               {ctaLabels.menu} <ArrowRight className="w-4 h-4" />
-            </Link>
+            </TrackedLink>
           </div>
         </FadeIn>
 
@@ -348,14 +364,16 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
               </div>
               <div className="flex justify-between text-sm uppercase tracking-[0.1em]">
                 <span className="text-white/50">{ctaLabels.brunchPrice}</span>
-                <span>{siteSettings.brunch.price}</span>
+                <span>{brunchPriceValue}</span>
               </div>
-              <a
-                href={siteSettings.reservationUrl}
+              <TrackedLink
+                href={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`}
+                eventName="brunch_reservation_started"
+                eventParams={{ language: params.locale, source: "home_brunch_block", button_location: "brunch_info_box" }}
                 className="mt-8 inline-flex items-center justify-center w-full border border-white/30 py-4 text-xs uppercase tracking-[0.25em] hover:bg-white hover:text-espresso transition-colors"
               >
                 {ctaLabels.reserve}
-              </a>
+              </TrackedLink>
             </div>
           </FadeIn>
           

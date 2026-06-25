@@ -1,48 +1,18 @@
 {
-  "generatedAt": "2026-04-17T06:11:02.473Z",
+  "generatedAt": "2026-06-22T08:02:21.368Z",
   "days": [
     {
-      "date": "2026-04-17",
-      "weekday": "fri",
-      "isOpen": true,
-      "openTime": "07:00",
-      "closeTime": "20:00",
-      "noteType": "happy_hour",
-      "noteText": "Happy hour",
-      "source": "happy_hour"
-    },
-    {
-      "date": "2026-04-18",
-      "weekday": "sat",
-      "isOpen": true,
-      "openTime": "11:00",
-      "closeTime": "17:00",
+      "date": "2026-06-22",
+      "weekday": "mon",
+      "isOpen": false,
+      "openTime": null,
+      "closeTime": null,
       "noteType": null,
       "noteText": null,
       "source": "base"
     },
     {
-      "date": "2026-04-19",
-      "weekday": "sun",
-      "isOpen": false,
-      "openTime": null,
-      "closeTime": null,
-      "noteType": "closure",
-      "noteText": "Fermeture exceptionnelle",
-      "source": "closure"
-    },
-    {
-      "date": "2026-04-20",
-      "weekday": "mon",
-      "isOpen": false,
-      "openTime": null,
-      "closeTime": null,
-      "noteType": "closure",
-      "noteText": "Fermeture exceptionnelle",
-      "source": "closure"
-    },
-    {
-      "date": "2026-04-21",
+      "date": "2026-06-23",
       "weekday": "tue",
       "isOpen": true,
       "openTime": "07:00",
@@ -52,7 +22,7 @@
       "source": "base"
     },
     {
-      "date": "2026-04-22",
+      "date": "2026-06-24",
       "weekday": "wed",
       "isOpen": true,
       "openTime": "07:00",
@@ -62,11 +32,41 @@
       "source": "base"
     },
     {
-      "date": "2026-04-23",
+      "date": "2026-06-25",
       "weekday": "thu",
       "isOpen": true,
       "openTime": "07:00",
       "closeTime": "17:00",
+      "noteType": null,
+      "noteText": null,
+      "source": "base"
+    },
+    {
+      "date": "2026-06-26",
+      "weekday": "fri",
+      "isOpen": true,
+      "openTime": "07:00",
+      "closeTime": "20:00",
+      "noteType": "happy_hour",
+      "noteText": "Happy hour",
+      "source": "happy_hour"
+    },
+    {
+      "date": "2026-06-27",
+      "weekday": "sat",
+      "isOpen": true,
+      "openTime": "11:00",
+      "closeTime": "17:00",
+      "noteType": null,
+      "noteText": null,
+      "source": "base"
+    },
+    {
+      "date": "2026-06-28",
+      "weekday": "sun",
+      "isOpen": false,
+      "openTime": null,
+      "closeTime": null,
       "noteType": null,
       "noteText": null,
       "source": "base"

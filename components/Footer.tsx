@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Locale, getLocaleNavigation, siteSettings } from "../data/site-content";
+import { Locale, getLocaleNavigation, localizedRoutes, siteSettings } from "../data/site-content";
 import { getPublicHoursForLocale } from "../lib/planning-hours";
+import { TrackedAnchor, TrackedLink } from "./TrackedLink";
 
 export default async function Footer({
   locale,
@@ -13,7 +14,7 @@ export default async function Footer({
   const openingHours = await getPublicHoursForLocale(locale);
   const labels = {
     address: locale === "fr" ? "Adresse" : locale === "en" ? "Address" : "Osoite",
-    hours: locale === "fr" ? "Horaires" : locale === "en" ? "Hours" : "Aukiolo",
+    hours: locale === "fr" ? "Horaires" : locale === "en" ? "Hours" : "Palvelemme",
     navigation: locale === "fr" ? "Navigation" : locale === "en" ? "Navigation" : "Navigointi"
   };
   return (
@@ -28,7 +29,7 @@ export default async function Footer({
               ? "Maison artisanale & accueil délicat depuis Kuusamo."
               : locale === "en"
                 ? "An artisan house with gentle hospitality in Kuusamo."
-                : "Artesaanitalo ja hienovarainen vieraanvaraisuus Kuusamossa."}
+                : "Käsityötä ja kaunista kahvilamiljöötä Kuusamossa."}
           </p>
         </div>
         <div className="space-y-4 text-sm text-cream/80">
@@ -36,17 +37,22 @@ export default async function Footer({
           <p className="text-[0.98rem]">{siteSettings.address}</p>
           <p className="text-[0.98rem]">{siteSettings.phone}</p>
           <p className="text-[0.98rem]">{siteSettings.email}</p>
-          <a href={siteSettings.instagramUrl} className="block text-cream/80 hover:text-cream">
+          <TrackedAnchor
+            href={siteSettings.instagramUrl}
+            eventName="instagram_clicked"
+            eventParams={{ language: locale, source: "footer" }}
+            className="block text-cream/80 hover:text-cream"
+          >
             Instagram
-          </a>
+          </TrackedAnchor>
         </div>
         <div className="space-y-4 text-sm text-cream/80">
           <p className="uppercase tracking-[0.2em] text-cream">{labels.hours}</p>
           <div className="space-y-2">
             {openingHours.map((item) => (
-              <div key={item.day} className="flex items-center justify-between gap-4">
-                <span className="uppercase tracking-[0.18em] text-[0.7rem] text-cream/60">{item.day}</span>
-                <span className="text-cream/90 text-[0.98rem] whitespace-nowrap text-right">{item.hours}</span>
+              <div key={item.day} className="grid grid-cols-[minmax(4.75rem,auto)_1fr] items-start gap-3">
+                <span className="uppercase tracking-[0.18em] text-[0.7rem] leading-5 text-cream/60">{item.day}</span>
+                <span className="text-right text-[0.98rem] leading-5 text-cream/90">{item.hours}</span>
               </div>
             ))}
           </div>
@@ -58,12 +64,14 @@ export default async function Footer({
               {item.label}
             </Link>
           ))}
-          <a
-            href={siteSettings.reservationUrl}
+          <TrackedLink
+            href={`/${locale}/${localizedRoutes.brunch[locale]}`}
+            eventName="brunch_reservation_started"
+            eventParams={{ language: locale, source: "footer", button_location: "footer_navigation" }}
             className="inline-flex items-center justify-center rounded-full bg-cream px-4 py-2 text-xs uppercase tracking-[0.22em] text-espresso hover:bg-cream/90 transition"
           >
             {locale === "fr" ? "Réserver" : locale === "en" ? "Reserve" : "Varaa"}
-          </a>
+          </TrackedLink>
         </div>
       </div>
       <div className="border-t border-cream/20">

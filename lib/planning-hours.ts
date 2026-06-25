@@ -175,8 +175,7 @@ export const getPublicHoursForLocale = async (locale: Locale) => {
           .toLocaleDateString(locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "fi-FI", {
             day: "numeric",
             month: "short"
-          })
-          .replace(".", "");
+          });
     const isClosure = day.noteType === "closure";
     const baseHours = isClosure
       ? closureLabels[locale]

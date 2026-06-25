@@ -19,9 +19,9 @@ export default async function OpeningHours({
       </div>
       <div className="mt-5 space-y-3">
         {openingHours.map((item) => (
-          <div key={item.day} className="flex items-center justify-between gap-4 text-sm md:text-base text-espresso/70">
-            <span className="uppercase tracking-[0.15em] text-[0.7rem] text-espresso/60">{item.day}</span>
-            <span className="font-medium text-espresso whitespace-nowrap text-right">{item.hours}</span>
+          <div key={item.day} className="grid grid-cols-[minmax(4.75rem,auto)_1fr] items-start gap-3 text-sm text-espresso/70 md:text-base">
+            <span className="uppercase tracking-[0.15em] text-[0.7rem] leading-5 text-espresso/60">{item.day}</span>
+            <span className="text-right font-medium leading-5 text-espresso">{item.hours}</span>
           </div>
         ))}
       </div>

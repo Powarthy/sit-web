@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { siteSettings } from "../data/site-content";
+import GoogleAnalytics from "../components/GoogleAnalytics";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -25,7 +26,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${serif.variable} ${sans.variable}`}>
-      <body className="bg-linen text-espresso">{children}</body>
+      <body className="bg-linen text-espresso">
+        {children}
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }

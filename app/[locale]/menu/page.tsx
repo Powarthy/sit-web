@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import FadeIn from "../../../components/FadeIn";
+import TrackOnMount from "../../../components/TrackOnMount";
+import { TrackedAnchor, TrackedLink } from "../../../components/TrackedLink";
 import {
   Locale,
   buildLocalizedUrl,
@@ -41,7 +43,7 @@ export default function MenuPage({ params }: { params: { locale: Locale } }) {
   const content = getLocaleContent(params.locale);
   const labels = {
     reserve: params.locale === "fr" ? "Réserver" : params.locale === "en" ? "Reserve" : "Varaa",
-    catering: params.locale === "fr" ? "Demander un devis" : params.locale === "en" ? "Request catering" : "Pyydä catering"
+    catering: params.locale === "fr" ? "Demander un devis" : params.locale === "en" ? "Request catering" : "Pyydä tarjous"
   };
 
   // Sélection d'images optimisées (webp) pour chaque section du menu
@@ -53,6 +55,7 @@ export default function MenuPage({ params }: { params: { locale: Locale } }) {
 
   return (
     <div className="bg-linen min-h-screen selection:bg-gold selection:text-white pb-24">
+      <TrackOnMount eventName="menu_viewed" eventParams={{ language: params.locale, source: "menu_page" }} />
       {/* MENU HERO SECTION */}
       <section className="relative w-full h-[60vh] md:h-[75vh] min-h-[520px] pt-32 md:pt-40 flex flex-col justify-end overflow-hidden border-b border-espresso/10">
         <div className="absolute inset-0 w-full h-full">
@@ -129,7 +132,6 @@ export default function MenuPage({ params }: { params: { locale: Locale } }) {
                     {section.items.map((item) => (
                       <div key={item.name} className="group flex flex-col gap-3 border-b border-espresso/10 pb-8 transition-all duration-300 hover:border-gold/50 hover:pl-4">
                         <p className="font-serif text-2xl md:text-3xl text-espresso tracking-tight group-hover:text-gold transition-colors duration-300">{item.name}</p>
-                        <p className="font-light text-base md:text-[1.05rem] text-espresso/70 leading-relaxed">{item.detail}</p>
                       </div>
                     ))}
                   </div>
@@ -175,28 +177,32 @@ export default function MenuPage({ params }: { params: { locale: Locale } }) {
               <div className="flex items-center gap-4 mb-6">
                 <span className="w-8 h-px bg-gold/50" />
                 <p className="text-[0.65rem] uppercase tracking-[0.35em] text-cafe font-medium">
-                  {params.locale === "fr" ? "À table" : params.locale === "en" ? "At the table" : "Pöydässä"}
+                  {params.locale === "fr" ? "À table" : params.locale === "en" ? "At the table" : "À table"}
                 </p>
               </div>
               <h2 className="font-serif text-4xl md:text-5xl text-espresso tracking-tight leading-[1.1]">
-                {params.locale === "fr" ? "Réservez un brunch ou un service privé" : params.locale === "en" ? "Reserve a brunch or a private service" : "Varaa brunssi tai yksityinen tarjoilu"}
+                {params.locale === "fr" ? "Réservez un brunch ou un service privé" : params.locale === "en" ? "Reserve a brunch or a private service" : "Varaa brunssi tai yksityistilaisuus"}
               </h2>
               <p className="mt-6 text-espresso/80 font-light text-lg leading-relaxed">{content.brunchPage.note}</p>
             </div>
             
             <div className="flex flex-col gap-4 shrink-0 w-full md:w-auto">
-              <a
-                href={siteSettings.reservationUrl}
+              <TrackedLink
+                href={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`}
+                eventName="brunch_reservation_started"
+                eventParams={{ language: params.locale, source: "menu_page", button_location: "bottom_cta" }}
                 className="flex items-center justify-center bg-espresso text-white px-8 py-4 text-xs uppercase tracking-[0.25em] font-medium transition-all hover:bg-gold hover:text-white"
               >
                 {labels.reserve}
-              </a>
-              <a
+              </TrackedLink>
+              <TrackedAnchor
                 href={`mailto:${siteSettings.email}`}
+                eventName="contact_clicked"
+                eventParams={{ language: params.locale, source: "menu_page", button_location: "catering_email" }}
                 className="flex items-center justify-center border border-espresso/30 bg-transparent text-espresso px-8 py-4 text-xs uppercase tracking-[0.25em] transition-all hover:bg-espresso hover:text-white"
               >
                 {labels.catering}
-              </a>
+              </TrackedAnchor>
             </div>
           </div>
         </FadeIn>
