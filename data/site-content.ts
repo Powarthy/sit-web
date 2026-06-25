@@ -25,9 +25,9 @@ export const siteSettings = {
   brunch: {
     cadence: "2e dimanche du mois",
     nextDate: "11:00 – 15:00 (café ouvert)",
-    hours: "10:45 & 12:45",
+    hours: "10:45 & 13:00",
     price: "45 € / personne",
-    reservationNote: "Réservation obligatoire. Deux services : 10:45 et 12:45."
+    reservationNote: "Réservation obligatoire. Deux services : 10:45 et 13:00."
   },
   seasonal: {
     title: "Printemps gourmand",
@@ -277,7 +277,7 @@ export const content: Record<Locale, PageContent> = {
       title: "En ce moment",
       subtitle: "Instants à savourer cette saison",
       items: [
-        { label: "Brunch signature", value: "2e dimanche · 10:45 & 12:45" },
+        { label: "Brunch signature", value: "Dates ouvertes · 10:45 & 13:00" },
         { label: "Ouverture du café", value: "11:00 – 15:00 ce dimanche" },
         { label: "Pause café", value: "Happy hours le vendredi" }
       ]
@@ -323,8 +323,8 @@ export const content: Record<Locale, PageContent> = {
       title: "Le brunch signature",
       intro: "Un rendez-vous gourmand mensuel qui associe pâtisserie française, inspirations nordiques et service attentionné.",
       details: [
-        { label: "Cadence", value: "2e dimanche du mois" },
-        { label: "Services", value: "10:45 & 12:45" },
+        { label: "Cadence", value: "Dates ouvertes à la réservation" },
+        { label: "Services", value: "10:45 & 13:00" },
         { label: "Café ouvert", value: "11:00 – 15:00" },
         { label: "Prix", value: "45 € / personne" }
       ],
@@ -333,7 +333,7 @@ export const content: Record<Locale, PageContent> = {
         "Choisissez votre créneau de 90 minutes",
         "Profitez d'une table élégante et d'un menu complet"
       ],
-      note: "Réservation obligatoire. Deux services : 10:45 et 12:45.",
+      note: "Réservation obligatoire. Deux services : 10:45 et 13:00.",
       cta: "Réserver le brunch"
     },
     menuPage: {
@@ -528,7 +528,7 @@ export const content: Record<Locale, PageContent> = {
       title: "Right now",
       subtitle: "Seasonal moments to savor",
       items: [
-        { label: "Signature brunch", value: "2nd Sunday · 10:45 & 12:45" },
+        { label: "Signature brunch", value: "Open booking dates · 10:45 & 13:00" },
         { label: "Café open", value: "11:00 – 15:00 that Sunday" },
         { label: "Coffee ritual", value: "Happy hours on Friday" }
       ]
@@ -574,8 +574,8 @@ export const content: Record<Locale, PageContent> = {
       title: "Signature brunch",
       intro: "A monthly gourmet rendez-vous blending French pastry, Nordic inspiration and attentive service.",
       details: [
-        { label: "Cadence", value: "Every 2nd Sunday" },
-        { label: "Seatings", value: "10:45 & 12:45" },
+        { label: "Cadence", value: "Open booking dates" },
+        { label: "Seatings", value: "10:45 & 13:00" },
         { label: "Café open", value: "11:00 – 15:00" },
         { label: "Price", value: "€45 per guest" }
       ],
@@ -584,7 +584,7 @@ export const content: Record<Locale, PageContent> = {
         "Choose your 90-minute seating",
         "Enjoy a refined table and full menu"
       ],
-      note: "Reservations required. Two seatings: 10:45 and 12:45.",
+      note: "Reservations required. Two seatings: 10:45 and 13:00.",
       cta: "Book the brunch"
     },
     menuPage: {
@@ -779,7 +779,7 @@ export const content: Record<Locale, PageContent> = {
       title: "Nyt",
       subtitle: "Tämänhetkiset nautinnot",
       items: [
-        { label: "Signature-brunssi", value: "Kuukauden 2. sunnuntai · 10:45 & 12:45" },
+        { label: "Signature-brunssi", value: "Avoimet varauspäivät · 10:45 & 13:00" },
         { label: "Kahvila auki", value: "11:00 – 15:00 sinä päivänä" },
         { label: "Tapahtumat", value: "Happy hours perjantaisin" }
       ]
@@ -825,8 +825,8 @@ export const content: Record<Locale, PageContent> = {
       title: "Signature-brunssi",
       intro: "Kuukausittainen gourmet-kohtaaminen ranskalaisella ja pohjoismaisella vivahteella.",
       details: [
-        { label: "Ajankohta", value: "Kuukauden 2. sunnuntai" },
-        { label: "Kattaukset", value: "10:45 & 12:45" },
+        { label: "Ajankohta", value: "Avoimet varauspäivät" },
+        { label: "Kattaukset", value: "10:45 & 13:00" },
         { label: "Kahvila palvelee", value: "11:00 – 15:00" },
         { label: "Hinta", value: "45 € / henkilö" }
       ],
@@ -835,7 +835,7 @@ export const content: Record<Locale, PageContent> = {
         "Valitse 90 minuutin istunto",
         "Nauti tyylikkäästä pöydästä ja kokonaismenuusta"
       ],
-      note: "Vain pöytävarauksella. Kaksi kattausta: 10:45 ja 12:45.",
+      note: "Vain pöytävarauksella. Kaksi kattausta: 10:45 ja 13:00.",
       cta: "Varaa brunssi"
     },
     menuPage: {

@@ -201,7 +201,7 @@ function formatDate(dateId: string, locale: Locale) {
 }
 
 function getReservationService(time: string) {
-  return time === "12:45" ? "service_2" : "service_1";
+  return time === "13:00" ? "service_2" : "service_1";
 }
 
 export default function BrunchReservationForm({ locale }: { locale: Locale }) {
@@ -242,7 +242,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
   }, [labels.error]);
 
   const selectedDate = useMemo(() => dates.find((item) => item.date === form.date) ?? dates[0] ?? null, [dates, form.date]);
-  const slots = selectedDate?.slots?.length ? selectedDate.slots : ["10:45", "12:45"];
+  const slots = selectedDate?.slots?.length ? selectedDate.slots : ["10:45", "13:00"];
 
   useEffect(() => {
     let cancelled = false;
