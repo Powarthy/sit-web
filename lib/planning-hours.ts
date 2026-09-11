@@ -1,4 +1,5 @@
 import { Locale, openingHoursByLocale, siteSettings } from "../data/site-content";
+import { planningApiUrl } from "./planning-api";
 import { readJson, writeJson } from "./storage";
 
 export type PublicHoursDay = {
@@ -30,8 +31,10 @@ const weekdayLabels: Record<Locale, Record<PublicHoursDay["weekday"], string>> =
   en: { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" },
   fi: { mon: "Ma", tue: "Ti", wed: "Ke", thu: "To", fri: "Pe", sat: "La", sun: "Su" }
 };
+const weekdays: PublicHoursDay["weekday"][] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 const closedLabels: Record<Locale, string> = { fr: "Fermé", en: "Closed", fi: "Suljettu" };
+const openLabels: Record<Locale, string> = { fr: "Ouvert", en: "Open", fi: "Avoinna" };
 const closureLabels: Record<Locale, string> = {
   fr: "Fermé exceptionnellement",
   en: "Exceptionally closed",
@@ -65,6 +68,85 @@ const coerceDay = (day: PublicHoursDay): PublicHoursDay => ({
   noteType: day.noteType ?? null,
   noteText: day.noteText ?? null
 });
+
+type PlanningApiDay = {
+  date: string;
+  dayOfWeek: number;
+  isOpen: boolean;
+  openTime?: string | null;
+  closeTime?: string | null;
+  eventType?: string | null;
+  label?: string | null;
+  labelFr?: string | null;
+  labelEn?: string | null;
+  labelFi?: string | null;
+  source?: string;
+};
+
+const getTodayDateKey = () =>
+  new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Helsinki",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+
+const getLocalizedApiLabel = (day: PlanningApiDay, locale: Locale) => {
+  if (locale === "en") return day.labelEn || day.label || day.labelFr || day.labelFi || null;
+  if (locale === "fi") return day.labelFi || day.label || day.labelFr || day.labelEn || null;
+  return day.labelFr || day.label || day.labelEn || day.labelFi || null;
+};
+
+const fetchLivePlanningHours = async (locale: Locale): Promise<PlanningHoursPayload | null> => {
+  try {
+    const search = new URLSearchParams({ days: "7", language: locale });
+    const response = await fetch(
+      planningApiUrl(`/api/public/site/hours?${search.toString()}`),
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      config?: { updatedAt?: string };
+      days?: PlanningApiDay[];
+    };
+    if (payload.ok !== true || !Array.isArray(payload.days)) return null;
+
+    const days = payload.days
+      .filter(
+        (day) =>
+          dateRegex.test(day.date) &&
+          Number.isInteger(day.dayOfWeek) &&
+          day.dayOfWeek >= 0 &&
+          day.dayOfWeek <= 6 &&
+          typeof day.isOpen === "boolean"
+      )
+      .map((day) => {
+        const noteType = day.eventType && day.eventType !== "none" ? day.eventType : null;
+        return {
+          date: day.date,
+          weekday: weekdays[day.dayOfWeek],
+          isOpen: day.isOpen,
+          openTime: day.openTime || null,
+          closeTime: day.closeTime || null,
+          noteType,
+          noteText: noteType ? getLocalizedApiLabel(day, locale) : null,
+          source: day.source || "application"
+        } satisfies PublicHoursDay;
+      });
+
+    if (!days.length) return null;
+
+    return {
+      generatedAt: payload.config?.updatedAt || new Date().toISOString(),
+      days
+    };
+  } catch {
+    return null;
+  }
+};
 
 export const readPlanningHours = async (): Promise<PlanningHoursPayload> => {
   const parsed = await readJson<PlanningHoursPayload>(STORAGE_KEY, defaultPayload);
@@ -162,7 +244,11 @@ export const validatePlanningHours = (payload: PlanningHoursPayload) => {
 };
 
 export const getPublicHoursForLocale = async (locale: Locale) => {
-  const { days } = await readPlanningHours();
+  const livePayload = await fetchLivePlanningHours(locale);
+  const storedPayload = livePayload ? null : await readPlanningHours();
+  const today = getTodayDateKey();
+  const days = livePayload?.days || storedPayload?.days.filter((day) => day.date >= today) || [];
+
   if (!days.length) {
     return openingHoursByLocale[locale] ?? siteSettings.openingHours;
   }
@@ -181,7 +267,9 @@ export const getPublicHoursForLocale = async (locale: Locale) => {
       ? closureLabels[locale]
       : day.isOpen && day.openTime && day.closeTime
         ? `${day.openTime} – ${day.closeTime}`
-        : closedLabels[locale];
+        : day.isOpen
+          ? openLabels[locale]
+          : closedLabels[locale];
     const noteText = day.noteType ? noteLabels[locale]?.[day.noteType] ?? day.noteText ?? "" : day.noteText ?? "";
     const note = !isClosure && noteText ? ` · ${noteText}` : "";
     return { day: `${label} ${dateLabel}`, hours: `${baseHours}${note}` };
