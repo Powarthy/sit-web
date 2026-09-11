@@ -263,15 +263,23 @@ export const getPublicHoursForLocale = async (locale: Locale) => {
             month: "short"
           });
     const isClosure = day.noteType === "closure";
+    const usesDefaultBrunchHours =
+      day.noteType === "brunch" && day.isOpen && (!day.openTime || !day.closeTime);
     const baseHours = isClosure
       ? closureLabels[locale]
       : day.isOpen && day.openTime && day.closeTime
         ? `${day.openTime} – ${day.closeTime}`
+        : usesDefaultBrunchHours
+          ? "11:00 – 15:00"
         : day.isOpen
           ? openLabels[locale]
           : closedLabels[locale];
     const noteText = day.noteType ? noteLabels[locale]?.[day.noteType] ?? day.noteText ?? "" : day.noteText ?? "";
-    const note = !isClosure && noteText ? ` · ${noteText}` : "";
+    const note = usesDefaultBrunchHours
+      ? " (Brunch)"
+      : !isClosure && noteText
+        ? ` · ${noteText}`
+        : "";
     return { day: `${label} ${dateLabel}`, hours: `${baseHours}${note}` };
   });
 };
