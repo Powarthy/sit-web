@@ -28,11 +28,12 @@ import { ArrowDownRight, ArrowRight, MapPin, Phone } from "lucide-react";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: Locale }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const current = getLocaleContent(params.locale);
   const canonical = buildLocalizedUrl(params.locale, localizedRoutes.home[params.locale]);
   return {
@@ -54,7 +55,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function HomePage({ params }: { params: { locale: Locale } }) {
+export default async function HomePage(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
   const heroImageUrl = siteSettings.heroImage.startsWith("http")
     ? siteSettings.heroImage
@@ -383,7 +385,7 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
             <div className="space-y-6">
               {content.proof.quotes.map((quote, i) => (
                 <p key={i} className="text-xl md:text-2xl font-light italic text-espresso/80 leading-snug">
-                  "{quote}"
+                  &ldquo;{quote}&rdquo;
                 </p>
               ))}
             </div>

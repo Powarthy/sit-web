@@ -14,11 +14,12 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: Locale }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
   const canonical = buildLocalizedUrl(params.locale, localizedRoutes.brunch[params.locale]);
   return {
@@ -40,7 +41,8 @@ export async function generateMetadata({
   };
 }
 
-export default function BrunchPage({ params }: { params: { locale: Locale } }) {
+export default async function BrunchPage(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
 
   return (

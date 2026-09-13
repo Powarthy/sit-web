@@ -1,10 +1,12 @@
 import GalleryPage, { generateGalleryMetadata } from "../../../components/GalleryPage";
 import type { Locale } from "../../../data/site-content";
 
-export function generateMetadata({ params }: { params: { locale: Locale } }) {
+export async function generateMetadata(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   return generateGalleryMetadata(params.locale);
 }
 
-export default function Page({ params }: { params: { locale: Locale } }) {
+export default async function Page(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   return <GalleryPage locale={params.locale} />;
 }

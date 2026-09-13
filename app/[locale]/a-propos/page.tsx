@@ -11,11 +11,12 @@ import {
 } from "../../../data/site-content";
 import { ArrowDownRight } from "lucide-react";
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: Locale }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
   const canonical = buildLocalizedUrl(params.locale, localizedRoutes.about[params.locale]);
   return {
@@ -37,7 +38,8 @@ export async function generateMetadata({
   };
 }
 
-export default function AboutPageFr({ params }: { params: { locale: Locale } }) {
+export default async function AboutPageFr(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
 
   const ctaLabels = {

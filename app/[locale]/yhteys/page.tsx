@@ -13,11 +13,12 @@ import {
   siteSettings
 } from "../../../data/site-content";
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: Locale }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
   const canonical = buildLocalizedUrl(params.locale, localizedRoutes.contact[params.locale]);
   return {
@@ -39,7 +40,8 @@ export async function generateMetadata({
   };
 }
 
-export default function ContactPageFi({ params }: { params: { locale: Locale } }) {
+export default async function ContactPageFi(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   const content = getLocaleContent(params.locale);
   const labels = {
     hours: "Palvelemme",

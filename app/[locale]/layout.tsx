@@ -10,11 +10,12 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = (await props.params) as { locale: Locale };
   const current = getLocaleContent(params.locale);
   return {
     title: current.seo.title,
@@ -30,13 +31,18 @@ export async function generateMetadata({
   };
 }
 
-export default function LocaleLayout({
-  children,
-  params
-}: {
-  children: React.ReactNode;
-  params: { locale: Locale };
-}) {
+export default async function LocaleLayout(
+  props: {
+    children: React.ReactNode;
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = (await props.params) as { locale: Locale };
+
+  const {
+    children
+  } = props;
+
   const content = getLocaleContent(params.locale);
   const navigation = getLocaleNavigation(params.locale);
 
