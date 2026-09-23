@@ -54,14 +54,14 @@ Système de synchronisation automatique des horaires publics entre le planning i
 ### Test Highlights (événements à la une)
 ```powershell
 cd "c:\Users\Arthur\Documents\site internet"
-$env:PLANNING_SYNC_TOKEN="9fK2xP7mQ4rT8vL1zN6aB3wH5yC0uD"
+$env:PLANNING_SYNC_TOKEN="<redacted>"
 node scripts/planning-sync-e2e.js
 ```
 
 ### Test Hours (horaires publics)
 ```powershell
 cd "c:\Users\Arthur\Documents\site internet"
-$env:PLANNING_SYNC_TOKEN="9fK2xP7mQ4rT8vL1zN6aB3wH5yC0uD"
+$env:PLANNING_SYNC_TOKEN="<redacted>"
 node scripts/planning-hours-e2e.js
 ```
 
