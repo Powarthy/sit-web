@@ -4,6 +4,7 @@ import {
   BrunchContractError,
   buildBrunchDatesResponse,
   buildBrunchMenuResponse,
+  formatPublishedOfferLabel,
 } from "../lib/brunch-widget.ts";
 
 function menu(
@@ -105,7 +106,7 @@ function offerFixture() {
   };
 }
 
-test("dates contract comes from ToqueHub with exact slots, prices and sold-out state", () => {
+test("dates contract exposes the real ToqueHub offer with exact slots and sold-out state", () => {
   const result = buildBrunchDatesResponse(offerFixture());
   assert.deepEqual(
     result.items.map((item) => item.date),
@@ -116,10 +117,30 @@ test("dates contract comes from ToqueHub with exact slots, prices and sold-out s
     { time: "10:45", available: true, remainingCapacity: 8 },
     { time: "13:00", available: false, remainingCapacity: 0 },
   ]);
-  assert.deepEqual(result.offer.options, [
-    { code: "classic", price: 45, priceSupplement: null },
-    { code: "sparkling", price: null, priceSupplement: 13.5 },
-  ]);
+  assert.equal(result.offer.id, "offer-1");
+  assert.equal(result.offer.name, "Brunch");
+  assert.equal(result.offer.pricePerPerson, 45);
+  assert.equal("options" in result.offer, false);
+});
+
+test("the website offer label is generated from the ToqueHub offer", () => {
+  const offer = {
+    id: "offer-1",
+    slug: "brunch",
+    name: "Brunch",
+    pricePerPerson: 45,
+    currency: "EUR",
+    titleI18n: { fi: "Brunssi", en: "Brunch", fr: "Brunch" },
+  };
+  assert.equal(
+    formatPublishedOfferLabel(offer, "fr"),
+    "Brunch — 45 € / personne",
+  );
+  assert.equal(formatPublishedOfferLabel(offer, "en"), "Brunch — €45 / person");
+  assert.equal(
+    formatPublishedOfferLabel(offer, "fi"),
+    "Brunssi — 45 € / henkilö",
+  );
 });
 
 test("changing the selected occurrence changes the menu", () => {

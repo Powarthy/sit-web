@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
           phone: body?.phone,
           allergies: body?.allergies,
           peopleCount: Number(body?.partySize),
-          optionCode: body?.offer,
           customerLocale: body?.locale,
           availabilityChoice: body?.availabilityChoice,
           alternateTime: body?.alternateTime,

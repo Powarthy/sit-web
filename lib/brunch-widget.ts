@@ -1,5 +1,14 @@
 export type BrunchLocale = "fi" | "en" | "fr";
 
+export type BrunchOfferSummary = {
+  id: string;
+  slug: string;
+  name: string;
+  pricePerPerson: number;
+  currency: string;
+  titleI18n?: Partial<Record<BrunchLocale, string>>;
+};
+
 type JsonRecord = Record<string, unknown>;
 
 export class BrunchContractError extends Error {
@@ -34,32 +43,12 @@ function localeValue(value: unknown): BrunchLocale {
 export function buildBrunchDatesResponse(input: unknown) {
   const offer = record(input);
   const metadata = record(offer.publicMetadata);
-  const rawOptions = Array.isArray(metadata.options) ? metadata.options : [];
-  const options = rawOptions.flatMap((candidate) => {
-    const option = record(candidate);
-    const code = stringValue(option.code);
-    if (!code) return [];
-    const price = numberValue(option.price);
-    const priceSupplement = numberValue(option.priceSupplement);
-    return [{ code, price, priceSupplement }];
-  });
   const dates = Array.isArray(offer.dates) ? offer.dates : [];
   const offerId = stringValue(offer.id);
   const slug = stringValue(offer.slug);
   const pricePerPerson = numberValue(offer.pricePerPerson);
   const currency = stringValue(offer.currency);
-  if (
-    !offerId ||
-    slug !== "brunch" ||
-    pricePerPerson == null ||
-    !currency ||
-    !options.some(
-      (option) => option.code === "classic" && option.price != null,
-    ) ||
-    !options.some(
-      (option) => option.code === "sparkling" && option.priceSupplement != null,
-    )
-  ) {
+  if (!offerId || slug !== "brunch" || pricePerPerson == null || !currency) {
     throw new BrunchContractError("INVALID_OFFER_CONTRACT");
   }
 
@@ -72,7 +61,6 @@ export function buildBrunchDatesResponse(input: unknown) {
       pricePerPerson,
       currency,
       titleI18n: record(metadata.titleI18n),
-      options,
     },
     items: dates.flatMap((candidate) => {
       const date = record(candidate);
@@ -109,6 +97,28 @@ export function buildBrunchDatesResponse(input: unknown) {
       ];
     }),
   };
+}
+
+export function formatPublishedOfferLabel(
+  offer: BrunchOfferSummary,
+  locale: BrunchLocale,
+) {
+  const localeTag =
+    locale === "en" ? "en-GB" : locale === "fi" ? "fi-FI" : "fr-FR";
+  const amount = offer.pricePerPerson.toLocaleString(localeTag, {
+    minimumFractionDigits: Number.isInteger(offer.pricePerPerson) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+  const price =
+    offer.currency === "EUR"
+      ? locale === "en"
+        ? `€${amount}`
+        : `${amount} €`
+      : `${amount} ${offer.currency}`;
+  const name = offer.titleI18n?.[locale]?.trim() || offer.name;
+  const perPerson =
+    locale === "fi" ? "henkilö" : locale === "en" ? "person" : "personne";
+  return `${name} — ${price} / ${perPerson}`;
 }
 
 export function buildBrunchMenuResponse(

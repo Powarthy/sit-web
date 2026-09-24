@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 import type { Locale } from "../data/site-content";
 import { trackEvent } from "../lib/analytics";
+import {
+  formatPublishedOfferLabel,
+  type BrunchOfferSummary,
+} from "../lib/brunch-widget";
 
 type BrunchDate = {
   date: string;
@@ -34,18 +38,7 @@ type BrunchMenuItem = {
   description: string;
 };
 
-type BrunchOffer = {
-  id: string;
-  slug: string;
-  name: string;
-  pricePerPerson: number | null;
-  currency: string;
-  options: Array<{
-    code: string;
-    price: number | null;
-    priceSupplement: number | null;
-  }>;
-};
+type BrunchOffer = BrunchOfferSummary;
 
 type FormState = {
   date: string;
@@ -55,7 +48,7 @@ type FormState = {
   phone: string;
   allergies: string;
   partySize: string;
-  offer: "classic" | "sparkling";
+  offerId: string;
 };
 
 const defaultForm: FormState = {
@@ -66,7 +59,7 @@ const defaultForm: FormState = {
   phone: "",
   allergies: "",
   partySize: "2",
-  offer: "classic",
+  offerId: "",
 };
 
 const labelsByLocale: Record<
@@ -227,7 +220,7 @@ const labelsByLocale: Record<
       "Peruutus ei ole mahdollinen alle 24 tuntia ennen varausta.",
     confirmBack: "Muokkaa",
     confirmOk: "Ymmärrän, vahvista",
-    offer: "Brunssivaihtoehto",
+    offer: "Brunssitarjous",
     menuTitle: "Brunssimenu",
     noMenu: "Brunssimenu julkaistaan pian. Voit varata pöydän jo nyt.",
     slotFullTitle: "Tämä kattaus on täynnä",
@@ -258,53 +251,6 @@ function formatDate(dateId: string, locale: Locale) {
 
 function getReservationService(time: string) {
   return time === "13:00" ? "service_2" : "service_1";
-}
-
-function formatOfferPrice(
-  value: number,
-  currency: string,
-  locale: Locale,
-  supplement = false,
-) {
-  const decimals = supplement ? 2 : Number.isInteger(value) ? 0 : 2;
-  const amount = value.toLocaleString(
-    locale === "en" ? "en-GB" : locale === "fi" ? "fi-FI" : "fr-FR",
-    {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    },
-  );
-  const sign = supplement ? "+" : "";
-  if (currency === "EUR")
-    return locale === "en" ? `${sign}€${amount}` : `${sign}${amount} €`;
-  return `${sign}${amount} ${currency}`;
-}
-
-function offerOptionLabel(
-  locale: Locale,
-  code: "classic" | "sparkling",
-  offer: BrunchOffer | null,
-) {
-  const option = offer?.options.find((candidate) => candidate.code === code);
-  const currency = offer?.currency || "EUR";
-  if (code === "sparkling") {
-    const supplement = option?.priceSupplement;
-    if (supplement == null) return "";
-    const amount = formatOfferPrice(supplement, currency, locale, true);
-    return locale === "fi"
-      ? `Brunssi kuohuviinillä - ${amount} / henkilö`
-      : locale === "en"
-        ? `Brunch with sparkling wine - ${amount} / person`
-        : `Brunch avec vin effervescent - ${amount} / personne`;
-  }
-  const price = option?.price ?? offer?.pricePerPerson;
-  if (price == null) return "";
-  const amount = formatOfferPrice(price, currency, locale);
-  return locale === "fi"
-    ? `Klassinen brunssi - ${amount} / henkilö`
-    : locale === "en"
-      ? `Classic brunch - ${amount} / person`
-      : `Brunch classique - ${amount} / personne`;
 }
 
 export default function BrunchReservationForm({ locale }: { locale: Locale }) {
@@ -341,14 +287,16 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         };
         if (!response.ok || !payload.offer)
           throw new Error("dates_unavailable");
+        const loadedOffer = payload.offer;
         const items = Array.isArray(payload.items) ? payload.items : [];
         if (cancelled) return;
         setDates(items);
-        setOffer(payload.offer);
+        setOffer(loadedOffer);
         setDatesError(false);
         setForm((prev) => ({
           ...prev,
           date: prev.date || items[0]?.date || "",
+          offerId: loadedOffer.id,
           time:
             items[0]?.slotAvailability?.find((slot) => slot.available)?.time ||
             items[0]?.slots?.[0] ||
@@ -452,6 +400,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         ...defaultForm,
         date: prev.date,
         time: finalTime,
+        offerId: prev.offerId,
       }));
       setSlotConflict(null);
     } catch {
@@ -650,20 +599,20 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
             </span>
             <select
               className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
-              value={form.offer}
+              required
+              value={form.offerId}
               onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
-                  offer: event.target.value as FormState["offer"],
+                  offerId: event.target.value,
                 }))
               }
             >
-              <option value="classic">
-                {offerOptionLabel(locale, "classic", offer)}
-              </option>
-              <option value="sparkling">
-                {offerOptionLabel(locale, "sparkling", offer)}
-              </option>
+              {offer ? (
+                <option value={offer.id}>
+                  {formatPublishedOfferLabel(offer, locale)}
+                </option>
+              ) : null}
             </select>
           </label>
           <label>
