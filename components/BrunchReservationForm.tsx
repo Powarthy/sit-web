@@ -1,7 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Loader2, Mail, Phone, Users } from "lucide-react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Loader2,
+  Mail,
+  Phone,
+  Users,
+} from "lucide-react";
 import type { Locale } from "../data/site-content";
 import { trackEvent } from "../lib/analytics";
 
@@ -13,13 +20,31 @@ type BrunchDate = {
   titleI18n?: Partial<Record<Locale, string>>;
   shortText?: string;
   shortTextI18n?: Partial<Record<Locale, string>>;
+  slotAvailability: Array<{
+    time: string;
+    available: boolean;
+    remainingCapacity: number;
+  }>;
 };
 
 type BrunchMenuItem = {
   id: string;
   category: "drinks" | "sweet" | "savory";
-  name: Partial<Record<Locale, string>>;
-  description: Partial<Record<Locale, string>>;
+  name: string;
+  description: string;
+};
+
+type BrunchOffer = {
+  id: string;
+  slug: string;
+  name: string;
+  pricePerPerson: number | null;
+  currency: string;
+  options: Array<{
+    code: string;
+    price: number | null;
+    priceSupplement: number | null;
+  }>;
 };
 
 type FormState = {
@@ -41,48 +66,53 @@ const defaultForm: FormState = {
   phone: "",
   allergies: "",
   partySize: "2",
-  offer: "classic"
+  offer: "classic",
 };
 
-const labelsByLocale: Record<Locale, {
-  loading: string;
-  noDates: string;
-  date: string;
-  time: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  allergies: string;
-  partySize: string;
-  submit: string;
-  sending: string;
-  success: string;
-  redirected: (time: string) => string;
-  waiting: string;
-  error: string;
-  optional: string;
-  people: string;
-  slotsTitle: string;
-  detailsTitle: string;
-  confirmTitle: string;
-  confirmBody: string;
-  confirmCancelRule: string;
-  confirmBack: string;
-  confirmOk: string;
-  offer: string;
-  classicOffer: string;
-  sparklingOffer: string;
-  menuTitle: string;
-  noMenu: string;
-  slotFullTitle: string;
-  slotFullBody: string;
-  chooseAlternate: (time: string) => string;
-  chooseWaitlist: string;
-  noAlternate: string;
-}> = {
+const labelsByLocale: Record<
+  Locale,
+  {
+    loading: string;
+    noDates: string;
+    date: string;
+    time: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    allergies: string;
+    partySize: string;
+    submit: string;
+    sending: string;
+    success: string;
+    redirected: (time: string) => string;
+    waiting: string;
+    error: string;
+    optional: string;
+    people: string;
+    slotsTitle: string;
+    detailsTitle: string;
+    confirmTitle: string;
+    confirmBody: string;
+    confirmCancelRule: string;
+    confirmBack: string;
+    confirmOk: string;
+    offer: string;
+    menuTitle: string;
+    noMenu: string;
+    slotFullTitle: string;
+    slotFullBody: string;
+    chooseAlternate: (time: string) => string;
+    chooseWaitlist: string;
+    noAlternate: string;
+    soldOut: string;
+    menuUpdating: string;
+    serviceUnavailable: string;
+  }
+> = {
   fr: {
     loading: "Chargement des dates de brunch...",
-    noDates: "Aucune date de brunch n'est ouverte à la réservation pour le moment.",
+    noDates:
+      "Aucune date de brunch n'est ouverte à la réservation pour le moment.",
     date: "Date du brunch",
     time: "Créneau - deux services",
     fullName: "Nom et prénom",
@@ -93,28 +123,36 @@ const labelsByLocale: Record<Locale, {
     submit: "Confirmer la réservation",
     sending: "Envoi...",
     success: "Merci, votre demande de réservation est enregistrée.",
-    redirected: (time) => `Le créneau demandé est complet. Votre réservation a été enregistrée sur le service de ${time}.`,
-    waiting: "Les deux services sont complets pour cette taille de table. Votre demande est enregistrée en liste d'attente.",
+    redirected: (time) =>
+      `Le créneau demandé est complet. Votre réservation a été enregistrée sur le service de ${time}.`,
+    waiting:
+      "Les deux services sont complets pour cette taille de table. Votre demande est enregistrée en liste d'attente.",
     error: "Impossible d'enregistrer la réservation. Merci de réessayer.",
     optional: "optionnel",
     people: "personnes",
     slotsTitle: "Deux services",
     detailsTitle: "Vos informations",
     confirmTitle: "Avant de confirmer",
-    confirmBody: "Tous nos produits sont faits maison et préparés spécialement pour le brunch.",
-    confirmCancelRule: "Aucune annulation n'est possible moins de 24h avant la réservation.",
+    confirmBody:
+      "Tous nos produits sont faits maison et préparés spécialement pour le brunch.",
+    confirmCancelRule:
+      "Aucune annulation n'est possible moins de 24h avant la réservation.",
     confirmBack: "Modifier",
     confirmOk: "J'ai compris, confirmer",
     offer: "Offre brunch",
-    classicOffer: "Brunch classique - 45 € / personne",
-    sparklingOffer: "Brunch avec vin effervescent - +13,50 € / personne",
     menuTitle: "Menu du brunch",
     noMenu: "Le menu sera publié prochainement. Vous pouvez déjà réserver.",
     slotFullTitle: "Ce service est complet",
-    slotFullBody: "Le créneau choisi n'a plus de disponibilité pour cette taille de table. Vous pouvez choisir un autre service disponible ou rester sur liste d'attente pour ce créneau.",
+    slotFullBody:
+      "Le créneau choisi n'a plus de disponibilité pour cette taille de table. Vous pouvez choisir un autre service disponible ou rester sur liste d'attente pour ce créneau.",
     chooseAlternate: (time) => `Choisir le service de ${time}`,
     chooseWaitlist: "Me placer sur liste d'attente",
-    noAlternate: "Aucun autre service disponible pour cette taille de table."
+    noAlternate: "Aucun autre service disponible pour cette taille de table.",
+    soldOut: "Complet",
+    menuUpdating:
+      "Menu en cours de mise à jour. Merci de réessayer dans quelques instants.",
+    serviceUnavailable:
+      "Le service de réservation est temporairement indisponible. Merci de réessayer.",
   },
   en: {
     loading: "Loading brunch dates...",
@@ -129,28 +167,36 @@ const labelsByLocale: Record<Locale, {
     submit: "Confirm booking",
     sending: "Sending...",
     success: "Thank you, your booking request has been saved.",
-    redirected: (time) => `The requested service is full. Your booking has been saved for the ${time} service.`,
-    waiting: "Both services are full for this table size. Your request has been saved on the waiting list.",
+    redirected: (time) =>
+      `The requested service is full. Your booking has been saved for the ${time} service.`,
+    waiting:
+      "Both services are full for this table size. Your request has been saved on the waiting list.",
     error: "We could not save the booking. Please try again.",
     optional: "optional",
     people: "guests",
     slotsTitle: "Two services",
     detailsTitle: "Your details",
     confirmTitle: "Before confirming",
-    confirmBody: "All our products are homemade and prepared specially for brunch.",
-    confirmCancelRule: "Cancellations are not possible less than 24h before the booking.",
+    confirmBody:
+      "All our products are homemade and prepared specially for brunch.",
+    confirmCancelRule:
+      "Cancellations are not possible less than 24h before the booking.",
     confirmBack: "Edit",
     confirmOk: "I understand, confirm",
     offer: "Brunch offer",
-    classicOffer: "Classic brunch - €45 / person",
-    sparklingOffer: "Brunch with sparkling wine - +€13.50 / person",
     menuTitle: "Brunch menu",
     noMenu: "The menu will be published soon. You can already book your table.",
     slotFullTitle: "This service is full",
-    slotFullBody: "The selected time no longer has availability for this table size. You can choose another available service or stay on the waiting list for this time.",
+    slotFullBody:
+      "The selected time no longer has availability for this table size. You can choose another available service or stay on the waiting list for this time.",
     chooseAlternate: (time) => `Choose the ${time} service`,
     chooseWaitlist: "Join the waiting list",
-    noAlternate: "No other service is available for this table size."
+    noAlternate: "No other service is available for this table size.",
+    soldOut: "Sold out",
+    menuUpdating:
+      "The menu is being updated. Please try again in a few moments.",
+    serviceUnavailable:
+      "The booking service is temporarily unavailable. Please try again.",
   },
   fi: {
     loading: "Ladataan brunssipäiviä...",
@@ -165,72 +211,151 @@ const labelsByLocale: Record<Locale, {
     submit: "Vahvista varaus",
     sending: "Lähetetään...",
     success: "Kiitos, varauspyyntösi on tallennettu.",
-    redirected: (time) => `Valitsemasi kattaus on täynnä. Varaus on tallennettu kattaukseen ${time}.`,
-    waiting: "Molemmat kattaukset ovat täynnä tälle henkilömäärälle. Varauspyyntö on tallennettu jonotuslistalle.",
+    redirected: (time) =>
+      `Valitsemasi kattaus on täynnä. Varaus on tallennettu kattaukseen ${time}.`,
+    waiting:
+      "Molemmat kattaukset ovat täynnä tälle henkilömäärälle. Varauspyyntö on tallennettu jonotuslistalle.",
     error: "Varausta ei voitu tallentaa. Yritä uudelleen.",
     optional: "valinnainen",
     people: "henkilöä",
     slotsTitle: "Kaksi kattausta",
     detailsTitle: "Tietosi",
     confirmTitle: "Ennen vahvistusta",
-    confirmBody: "Kaikki tuotteemme ovat kotitekoisia ja valmistetaan brunssia varten.",
-    confirmCancelRule: "Peruutus ei ole mahdollinen alle 24 tuntia ennen varausta.",
+    confirmBody:
+      "Kaikki tuotteemme ovat kotitekoisia ja valmistetaan brunssia varten.",
+    confirmCancelRule:
+      "Peruutus ei ole mahdollinen alle 24 tuntia ennen varausta.",
     confirmBack: "Muokkaa",
     confirmOk: "Ymmärrän, vahvista",
     offer: "Brunssivaihtoehto",
-    classicOffer: "Klassinen brunssi - 45 € / henkilö",
-    sparklingOffer: "Brunssi kuohuviinillä - +13,50 € / henkilö",
     menuTitle: "Brunssimenu",
     noMenu: "Brunssimenu julkaistaan pian. Voit varata pöydän jo nyt.",
     slotFullTitle: "Tämä kattaus on täynnä",
-    slotFullBody: "Valitussa kattauksessa ei ole enää tilaa tälle henkilömäärälle. Voit valita toisen vapaan kattauksen tai jäädä jonotuslistalle tähän aikaan.",
+    slotFullBody:
+      "Valitussa kattauksessa ei ole enää tilaa tälle henkilömäärälle. Voit valita toisen vapaan kattauksen tai jäädä jonotuslistalle tähän aikaan.",
     chooseAlternate: (time) => `Valitse kattaus ${time}`,
     chooseWaitlist: "Liity jonotuslistalle",
-    noAlternate: "Toista vapaata kattausta ei ole tälle henkilömäärälle."
-  }
+    noAlternate: "Toista vapaata kattausta ei ole tälle henkilömäärälle.",
+    soldOut: "Täynnä",
+    menuUpdating: "Ruokalistaa päivitetään. Yritä hetken kuluttua uudelleen.",
+    serviceUnavailable:
+      "Varauspalvelu ei ole tilapäisesti käytettävissä. Yritä uudelleen.",
+  },
 };
 
 function formatDate(dateId: string, locale: Locale) {
   const parsed = new Date(`${dateId}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateId;
-  return parsed.toLocaleDateString(locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "fi-FI", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  });
+  return parsed.toLocaleDateString(
+    locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "fi-FI",
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    },
+  );
 }
 
 function getReservationService(time: string) {
   return time === "13:00" ? "service_2" : "service_1";
 }
 
+function formatOfferPrice(
+  value: number,
+  currency: string,
+  locale: Locale,
+  supplement = false,
+) {
+  const decimals = supplement ? 2 : Number.isInteger(value) ? 0 : 2;
+  const amount = value.toLocaleString(
+    locale === "en" ? "en-GB" : locale === "fi" ? "fi-FI" : "fr-FR",
+    {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    },
+  );
+  const sign = supplement ? "+" : "";
+  if (currency === "EUR")
+    return locale === "en" ? `${sign}€${amount}` : `${sign}${amount} €`;
+  return `${sign}${amount} ${currency}`;
+}
+
+function offerOptionLabel(
+  locale: Locale,
+  code: "classic" | "sparkling",
+  offer: BrunchOffer | null,
+) {
+  const option = offer?.options.find((candidate) => candidate.code === code);
+  const currency = offer?.currency || "EUR";
+  if (code === "sparkling") {
+    const supplement = option?.priceSupplement;
+    if (supplement == null) return "";
+    const amount = formatOfferPrice(supplement, currency, locale, true);
+    return locale === "fi"
+      ? `Brunssi kuohuviinillä - ${amount} / henkilö`
+      : locale === "en"
+        ? `Brunch with sparkling wine - ${amount} / person`
+        : `Brunch avec vin effervescent - ${amount} / personne`;
+  }
+  const price = option?.price ?? offer?.pricePerPerson;
+  if (price == null) return "";
+  const amount = formatOfferPrice(price, currency, locale);
+  return locale === "fi"
+    ? `Klassinen brunssi - ${amount} / henkilö`
+    : locale === "en"
+      ? `Classic brunch - ${amount} / person`
+      : `Brunch classique - ${amount} / personne`;
+}
+
 export default function BrunchReservationForm({ locale }: { locale: Locale }) {
   const labels = labelsByLocale[locale] ?? labelsByLocale.fr;
   const [dates, setDates] = useState<BrunchDate[]>([]);
+  const [offer, setOffer] = useState<BrunchOffer | null>(null);
   const [form, setForm] = useState<FormState>(defaultForm);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [menuItems, setMenuItems] = useState<BrunchMenuItem[]>([]);
-  const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
-  const [slotConflict, setSlotConflict] = useState<{ requestedTime: string; alternateTime: string } | null>(null);
+  const [datesError, setDatesError] = useState(false);
+  const [menuError, setMenuError] = useState(false);
+  const [menuLoading, setMenuLoading] = useState(false);
+  const [message, setMessage] = useState<{
+    kind: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [slotConflict, setSlotConflict] = useState<{
+    requestedTime: string;
+    alternateTime: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function loadDates() {
       try {
-        const response = await fetch("/api/brunch/dates", { cache: "no-store" });
-        const payload = (await response.json()) as { items?: BrunchDate[] };
+        const response = await fetch("/api/brunch/dates", {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as {
+          offer?: BrunchOffer;
+          items?: BrunchDate[];
+        };
+        if (!response.ok || !payload.offer)
+          throw new Error("dates_unavailable");
         const items = Array.isArray(payload.items) ? payload.items : [];
         if (cancelled) return;
         setDates(items);
+        setOffer(payload.offer);
+        setDatesError(false);
         setForm((prev) => ({
           ...prev,
           date: prev.date || items[0]?.date || "",
-          time: items[0]?.slots?.[0] || "10:45"
+          time:
+            items[0]?.slotAvailability?.find((slot) => slot.available)?.time ||
+            items[0]?.slots?.[0] ||
+            "",
         }));
       } catch {
-        if (!cancelled) setMessage({ kind: "error", text: labels.error });
+        if (!cancelled) setDatesError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -241,16 +366,35 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
     };
   }, [labels.error]);
 
-  const selectedDate = useMemo(() => dates.find((item) => item.date === form.date) ?? dates[0] ?? null, [dates, form.date]);
-  const slots = selectedDate?.slots?.length ? selectedDate.slots : ["10:45", "13:00"];
+  const selectedDate = useMemo(
+    () => dates.find((item) => item.date === form.date) ?? dates[0] ?? null,
+    [dates, form.date],
+  );
+  const slots = selectedDate?.slots ?? [];
 
   useEffect(() => {
     let cancelled = false;
     async function loadMenu() {
       if (!form.date) return;
-      const response = await fetch(`/api/brunch/menu?date=${encodeURIComponent(form.date)}&locale=${encodeURIComponent(locale)}`, { cache: "no-store" });
-      const payload = (await response.json().catch(() => ({}))) as { items?: BrunchMenuItem[] };
-      if (!cancelled) setMenuItems(Array.isArray(payload.items) ? payload.items : []);
+      setMenuLoading(true);
+      setMenuError(false);
+      setMenuItems([]);
+      try {
+        const response = await fetch(
+          `/api/brunch/menu?date=${encodeURIComponent(form.date)}&locale=${encodeURIComponent(locale)}`,
+          { cache: "no-store" },
+        );
+        const payload = (await response.json().catch(() => ({}))) as {
+          items?: BrunchMenuItem[];
+        };
+        if (!response.ok) throw new Error("menu_unavailable");
+        if (!cancelled)
+          setMenuItems(Array.isArray(payload.items) ? payload.items : []);
+      } catch {
+        if (!cancelled) setMenuError(true);
+      } finally {
+        if (!cancelled) setMenuLoading(false);
+      }
     }
     void loadMenu();
     return () => {
@@ -270,12 +414,21 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
           ...form,
           locale,
           availabilityChoice: choice,
-          alternateTime: choice === "alternate" ? slotConflict?.alternateTime : undefined
-        })
+          alternateTime:
+            choice === "alternate" ? slotConflict?.alternateTime : undefined,
+        }),
       });
-      const payload = (await response.json().catch(() => ({}))) as { placement?: string; finalTime?: string; requestedTime?: string; alternateTime?: string };
+      const payload = (await response.json().catch(() => ({}))) as {
+        placement?: string;
+        finalTime?: string;
+        requestedTime?: string;
+        alternateTime?: string;
+      };
       if (response.status === 409) {
-        setSlotConflict({ requestedTime: payload.requestedTime || form.time, alternateTime: payload.alternateTime || "" });
+        setSlotConflict({
+          requestedTime: payload.requestedTime || form.time,
+          alternateTime: payload.alternateTime || "",
+        });
         return;
       }
       if (!response.ok) throw new Error("reservation_failed");
@@ -284,20 +437,21 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         language: locale,
         source: "brunch_reservation_form",
         reservation_service: getReservationService(finalTime),
-        placement: payload.placement || "confirmed"
+        placement: payload.placement || "confirmed",
       });
       setMessage({
         kind: "success",
-        text: payload.placement === "redirected"
-          ? labels.redirected(finalTime)
-          : payload.placement === "waiting"
-            ? labels.waiting
-            : labels.success
+        text:
+          payload.placement === "redirected"
+            ? labels.redirected(finalTime)
+            : payload.placement === "waiting"
+              ? labels.waiting
+              : labels.success,
       });
       setForm((prev) => ({
         ...defaultForm,
         date: prev.date,
-        time: finalTime
+        time: finalTime,
       }));
       setSlotConflict(null);
     } catch {
@@ -314,7 +468,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
       trackEvent("brunch_reservation_started", {
         language: locale,
         source: "brunch_reservation_form",
-        reservation_service: getReservationService(form.time)
+        reservation_service: getReservationService(form.time),
       });
       setConfirmOpen(true);
       return;
@@ -335,28 +489,45 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
     return (
       <div className="border border-espresso/10 bg-white/70 p-8 text-espresso/70">
         <CalendarDays className="mb-4 h-6 w-6 text-gold" />
-        {labels.noDates}
+        {datesError ? labels.serviceUnavailable : labels.noDates}
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-px bg-espresso/10 lg:grid-cols-[0.8fr_1.2fr]">
+    <form
+      onSubmit={submit}
+      className="grid gap-px bg-espresso/10 lg:grid-cols-[0.8fr_1.2fr]"
+    >
       <div className="bg-espresso p-8 text-white md:p-10">
         <div className="space-y-6">
           <label className="block">
-            <span className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/55">{labels.date}</span>
+            <span className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/55">
+              {labels.date}
+            </span>
             <select
               className="w-full border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none focus:border-gold"
               value={form.date}
               onChange={(event) => {
                 const nextDate = event.target.value;
                 const next = dates.find((item) => item.date === nextDate);
-                setForm((prev) => ({ ...prev, date: nextDate, time: next?.slots?.[0] || "10:45" }));
+                setForm((prev) => ({
+                  ...prev,
+                  date: nextDate,
+                  time:
+                    next?.slotAvailability?.find((slot) => slot.available)
+                      ?.time ||
+                    next?.slots?.[0] ||
+                    "",
+                }));
               }}
             >
               {dates.map((item) => (
-                <option key={item.date} value={item.date} className="text-espresso">
+                <option
+                  key={item.date}
+                  value={item.date}
+                  className="text-espresso"
+                >
                   {formatDate(item.date, locale)}
                 </option>
               ))}
@@ -364,7 +535,9 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
           </label>
 
           <div>
-            <span className="mb-3 block text-xs uppercase tracking-[0.2em] text-white/55">{labels.time}</span>
+            <span className="mb-3 block text-xs uppercase tracking-[0.2em] text-white/55">
+              {labels.time}
+            </span>
             <div className="grid grid-cols-2 gap-3">
               {slots.map((slot) => (
                 <button
@@ -378,52 +551,143 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
                   onClick={() => setForm((prev) => ({ ...prev, time: slot }))}
                 >
                   {slot}
+                  {selectedDate?.slotAvailability.find(
+                    (item) => item.time === slot,
+                  )?.available === false ? (
+                    <span className="mt-1 block font-sans text-[0.6rem] uppercase tracking-[0.18em]">
+                      {labels.soldOut}
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
           </div>
 
-          <BrunchMenuPanel title={labels.menuTitle} items={menuItems} locale={locale} emptyText={labels.noMenu} />
+          <BrunchMenuPanel
+            title={labels.menuTitle}
+            items={menuItems}
+            locale={locale}
+            emptyText={
+              menuLoading
+                ? labels.loading
+                : menuError
+                  ? labels.menuUpdating
+                  : labels.noMenu
+            }
+          />
         </div>
       </div>
 
       <div className="bg-white p-8 md:p-10">
-        <p className="mb-6 text-[0.65rem] font-medium uppercase tracking-[0.3em] text-cafe">{labels.detailsTitle}</p>
+        <p className="mb-6 text-[0.65rem] font-medium uppercase tracking-[0.3em] text-cafe">
+          {labels.detailsTitle}
+        </p>
         <div className="grid gap-5">
           <label>
-            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">{labels.fullName}</span>
-            <input className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" required value={form.fullName} onChange={(event) => setForm((prev) => ({ ...prev, fullName: event.target.value }))} />
+            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">
+              {labels.fullName}
+            </span>
+            <input
+              className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+              required
+              value={form.fullName}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, fullName: event.target.value }))
+              }
+            />
           </label>
           <div className="grid gap-5 md:grid-cols-2">
             <label>
-              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe"><Mail className="h-3 w-3" />{labels.email}</span>
-              <input className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" type="email" required value={form.email} onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))} />
+              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe">
+                <Mail className="h-3 w-3" />
+                {labels.email}
+              </span>
+              <input
+                className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+                type="email"
+                required
+                value={form.email}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, email: event.target.value }))
+                }
+              />
             </label>
             <label>
-              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe"><Phone className="h-3 w-3" />{labels.phone}</span>
-              <input className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" required value={form.phone} onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))} />
+              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe">
+                <Phone className="h-3 w-3" />
+                {labels.phone}
+              </span>
+              <input
+                className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+                required
+                value={form.phone}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, phone: event.target.value }))
+                }
+              />
             </label>
           </div>
           <label>
-            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe"><Users className="h-3 w-3" />{labels.partySize}</span>
-            <input className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" min="1" max="20" required type="number" value={form.partySize} onChange={(event) => setForm((prev) => ({ ...prev, partySize: event.target.value }))} />
+            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-cafe">
+              <Users className="h-3 w-3" />
+              {labels.partySize}
+            </span>
+            <input
+              className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+              min="1"
+              max="20"
+              required
+              type="number"
+              value={form.partySize}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, partySize: event.target.value }))
+              }
+            />
           </label>
           <label>
-            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">{labels.offer}</span>
-            <select className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" value={form.offer} onChange={(event) => setForm((prev) => ({ ...prev, offer: event.target.value as FormState["offer"] }))}>
-              <option value="classic">{labels.classicOffer}</option>
-              <option value="sparkling">{labels.sparklingOffer}</option>
+            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">
+              {labels.offer}
+            </span>
+            <select
+              className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+              value={form.offer}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  offer: event.target.value as FormState["offer"],
+                }))
+              }
+            >
+              <option value="classic">
+                {offerOptionLabel(locale, "classic", offer)}
+              </option>
+              <option value="sparkling">
+                {offerOptionLabel(locale, "sparkling", offer)}
+              </option>
             </select>
           </label>
           <label>
-            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">{labels.allergies} <span className="text-espresso/40">({labels.optional})</span></span>
-            <textarea className="min-h-28 w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold" value={form.allergies} onChange={(event) => setForm((prev) => ({ ...prev, allergies: event.target.value }))} />
+            <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-cafe">
+              {labels.allergies}{" "}
+              <span className="text-espresso/40">({labels.optional})</span>
+            </span>
+            <textarea
+              className="min-h-28 w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+              value={form.allergies}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, allergies: event.target.value }))
+              }
+            />
           </label>
         </div>
 
         {message ? (
-          <div className={`mt-6 flex items-start gap-3 border p-4 text-sm ${message.kind === "success" ? "border-emerald-600/20 bg-emerald-50 text-emerald-900" : "border-red-600/20 bg-red-50 text-red-900"}`}>
-            {message.kind === "success" ? <CheckCircle2 className="mt-0.5 h-4 w-4" /> : null}
+          <div
+            className={`mt-6 flex items-start gap-3 border p-4 text-sm ${message.kind === "success" ? "border-emerald-600/20 bg-emerald-50 text-emerald-900" : "border-red-600/20 bg-red-50 text-red-900"}`}
+          >
+            {message.kind === "success" ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4" />
+            ) : null}
             <span>{message.text}</span>
           </div>
         ) : null}
@@ -433,13 +697,25 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
             <p className="mt-2 text-espresso/75">{labels.slotFullBody}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {slotConflict.alternateTime ? (
-                <button type="button" disabled={sending} className="bg-espresso px-4 py-3 text-xs uppercase tracking-[0.2em] text-white disabled:opacity-60" onClick={() => void sendReservation("alternate")}>
+                <button
+                  type="button"
+                  disabled={sending}
+                  className="bg-espresso px-4 py-3 text-xs uppercase tracking-[0.2em] text-white disabled:opacity-60"
+                  onClick={() => void sendReservation("alternate")}
+                >
                   {labels.chooseAlternate(slotConflict.alternateTime)}
                 </button>
               ) : (
-                <div className="border border-espresso/10 px-4 py-3 text-espresso/60">{labels.noAlternate}</div>
+                <div className="border border-espresso/10 px-4 py-3 text-espresso/60">
+                  {labels.noAlternate}
+                </div>
               )}
-              <button type="button" disabled={sending} className="border border-espresso/20 px-4 py-3 text-xs uppercase tracking-[0.2em] disabled:opacity-60" onClick={() => void sendReservation("waitlist")}>
+              <button
+                type="button"
+                disabled={sending}
+                className="border border-espresso/20 px-4 py-3 text-xs uppercase tracking-[0.2em] disabled:opacity-60"
+                onClick={() => void sendReservation("waitlist")}
+              >
                 {labels.chooseWaitlist}
               </button>
             </div>
@@ -458,12 +734,22 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
             <div className="max-w-lg bg-white p-8 text-espresso shadow-2xl">
               <h3 className="font-serif text-3xl">{labels.confirmTitle}</h3>
               <p className="mt-4 text-espresso/75">{labels.confirmBody}</p>
-              <p className="mt-3 font-semibold text-espresso">{labels.confirmCancelRule}</p>
+              <p className="mt-3 font-semibold text-espresso">
+                {labels.confirmCancelRule}
+              </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button type="button" className="flex-1 border border-espresso/20 px-5 py-3 text-xs uppercase tracking-[0.2em]" onClick={() => setConfirmOpen(false)}>
+                <button
+                  type="button"
+                  className="flex-1 border border-espresso/20 px-5 py-3 text-xs uppercase tracking-[0.2em]"
+                  onClick={() => setConfirmOpen(false)}
+                >
                   {labels.confirmBack}
                 </button>
-                <button type="submit" disabled={sending} className="flex-1 bg-espresso px-5 py-3 text-xs uppercase tracking-[0.2em] text-white disabled:opacity-60">
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="flex-1 bg-espresso px-5 py-3 text-xs uppercase tracking-[0.2em] text-white disabled:opacity-60"
+                >
                   {sending ? labels.sending : labels.confirmOk}
                 </button>
               </div>
@@ -475,26 +761,46 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
   );
 }
 
-function BrunchMenuPanel({ title, items, locale, emptyText }: { title: string; items: BrunchMenuItem[]; locale: Locale; emptyText: string }) {
+function BrunchMenuPanel({
+  title,
+  items,
+  locale,
+  emptyText,
+}: {
+  title: string;
+  items: BrunchMenuItem[];
+  locale: Locale;
+  emptyText: string;
+}) {
   const labels: Record<BrunchMenuItem["category"], string> = {
-    drinks: locale === "en" ? "Drinks" : locale === "fi" ? "Juomat" : "Boissons",
+    drinks:
+      locale === "en" ? "Drinks" : locale === "fi" ? "Juomat" : "Boissons",
     sweet: locale === "en" ? "Sweet" : locale === "fi" ? "Makea" : "Sucré",
     savory: locale === "en" ? "Savory" : locale === "fi" ? "Suolainen" : "Salé",
   };
-  if (!items.length) return <div className="border border-white/10 p-4 text-center text-sm text-white/65">{emptyText}</div>;
+  if (!items.length)
+    return (
+      <div className="border border-white/10 p-4 text-center text-sm text-white/65">
+        {emptyText}
+      </div>
+    );
   return (
     <div className="space-y-5 border border-white/10 p-5 text-center">
       <div className="font-serif text-3xl text-white">{title}</div>
       {(["drinks", "sweet", "savory"] as const).map((category) => {
-        const categoryItems = items.filter((item) => item.category === category);
+        const categoryItems = items.filter(
+          (item) => item.category === category,
+        );
         if (!categoryItems.length) return null;
         return (
           <div key={category}>
-            <div className="mb-2 text-xs font-medium uppercase tracking-[0.24em] text-gold">{labels[category]}</div>
+            <div className="mb-2 text-xs font-medium uppercase tracking-[0.24em] text-gold">
+              {labels[category]}
+            </div>
             <div className="space-y-2">
               {categoryItems.map((item) => (
                 <div key={item.id}>
-                  <div className="font-medium text-white">{item.name?.[locale] || item.name?.fr}</div>
+                  <div className="font-medium text-white">{item.name}</div>
                 </div>
               ))}
             </div>
