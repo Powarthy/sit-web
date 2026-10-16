@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { toquehubReservationsApiUrl } from "../../../../../../../lib/planning-api";
+import { toquehubFetch } from "../../../../../../../lib/toquehub-fetch";
 
 export const dynamic = "force-dynamic";
 
 async function proxy(token: string, method: "GET" | "POST") {
   try {
-    const response = await fetch(
-      toquehubReservationsApiUrl(
-        `/api/public/v1/reservations/cancel/${encodeURIComponent(token)}`,
-      ),
+    const response = await toquehubFetch(
+      `/api/public/v1/reservations/cancel/${encodeURIComponent(token)}`,
       { method, cache: "no-store", redirect: "manual" },
     );
     return new NextResponse(await response.text(), {
       status: response.status,
       headers: {
-        "Content-Type": response.headers.get("content-type") || "text/html; charset=utf-8",
+        "Content-Type":
+          response.headers.get("content-type") || "text/html; charset=utf-8",
       },
     });
   } catch {
