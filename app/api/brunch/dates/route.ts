@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { buildBrunchDatesResponse } from "../../../../lib/brunch-widget";
-import { toquehubReservationsApiUrl } from "../../../../lib/planning-api";
+import { toquehubFetch } from "../../../../lib/toquehub-fetch";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const response = await fetch(
-      toquehubReservationsApiUrl(
-        "/api/public/v1/reservations/offers/brunch/availability",
-      ),
+    const response = await toquehubFetch(
+      "/api/public/v1/reservations/offers/brunch/availability",
       { cache: "no-store" },
     );
     const offer = await response.json().catch(() => null);

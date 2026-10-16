@@ -3,7 +3,7 @@ import {
   BrunchContractError,
   buildBrunchMenuResponse,
 } from "../../../../lib/brunch-widget";
-import { toquehubReservationsApiUrl } from "../../../../lib/planning-api";
+import { toquehubFetch } from "../../../../lib/toquehub-fetch";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +11,8 @@ export async function GET(request: NextRequest) {
   try {
     const date = request.nextUrl.searchParams.get("date") || "";
     const locale = request.nextUrl.searchParams.get("locale") || "fr";
-    const response = await fetch(
-      toquehubReservationsApiUrl(
-        `/api/public/v1/reservations/offers/brunch?locale=${encodeURIComponent(locale)}`,
-      ),
+    const response = await toquehubFetch(
+      `/api/public/v1/reservations/offers/brunch?locale=${encodeURIComponent(locale)}`,
       { cache: "no-store" },
     );
     const offer = await response.json().catch(() => null);
