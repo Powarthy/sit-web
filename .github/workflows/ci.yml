@@ -1,0 +1,62 @@
+name: Node 24 checks
+on:
+  pull_request:
+    branches: [final]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - name: Capture full and production audits with original exit codes
+        shell: bash
+        run: |
+          mkdir -p audit-results
+          set +e
+          npm audit --json > audit-results/full.json
+          full_code=$?
+          npm audit --omit=dev --json > audit-results/production.json
+          production_code=$?
+          printf '%s\n' "$full_code" > audit-results/full.exit-code
+          printf '%s\n' "$production_code" > audit-results/production.exit-code
+          set -e
+          # Only the known moderate tooling residual is non-blocking.
+          node <<'NODE'
+          const fs = require('node:fs');
+          const read = name => JSON.parse(fs.readFileSync(`audit-results/${name}.json`, 'utf8'));
+          const code = name => Number(fs.readFileSync(`audit-results/${name}.exit-code`, 'utf8'));
+          const full = read('full');
+          const prod = read('production');
+          if (prod.error || code('production') !== 0 || prod.metadata?.vulnerabilities?.total !== 0) {
+            throw new Error('Production audit failed; see retained JSON and exit code');
+          }
+          if (full.error || !full.metadata?.vulnerabilities) throw new Error('Full audit unavailable');
+          if (code('full') !== 0) {
+            const counts = full.metadata.vulnerabilities;
+            const advisories = Object.values(full.vulnerabilities ?? {}).flatMap(v => v.via).filter(v => typeof v === 'object');
+            if (code('full') !== 1 || counts.low || counts.high || counts.critical || !counts.moderate || !advisories.length || advisories.some(v => v.url !== 'https://github.com/advisories/GHSA-g3hv-75wg-m249' || v.severity !== 'moderate')) {
+              throw new Error('Unexpected full audit failure; see retained JSON and exit code');
+            }
+            console.log('::warning::Full audit exit 1: known moderate minimatch residual explicitly non-blocking; audit is NOT clean.');
+          } else if (full.metadata.vulnerabilities.total !== 0) {
+            throw new Error('Inconsistent full audit result');
+          }
+          NODE
+      - name: Retain audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-audits
+          path: audit-results/
+          if-no-files-found: error
+      - run: npm run lint
+      - run: npm test
+      - run: npx --no-install tsc --noEmit
+      - run: npm run build
