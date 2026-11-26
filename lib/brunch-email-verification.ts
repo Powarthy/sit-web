@@ -34,7 +34,17 @@ export function isEmailCodePreview(requestUrl: URL) {
 }
 
 function store() {
-  return getStore({ name: brunchEmailStoreName, consistency: "strong" });
+  return getStore({
+    name: brunchEmailStoreName,
+    consistency: "strong",
+    // A signal opts out of Next.js fetch deduplication. The Blobs SDK needs
+    // to cancel response bodies without waiting for a second reader.
+    fetch: (input, init) => fetch(input, {
+      ...init,
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    }),
+  });
 }
 
 async function read(key: string): Promise<Entry | null> {

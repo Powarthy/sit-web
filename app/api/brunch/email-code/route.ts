@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
       { id: result.id, previewCode: result.previewCode },
       { headers: { "Cache-Control": "no-store" } },
     );
-  } catch {
+  } catch (error) {
+    const failure = error instanceof Error ? error.name : "UnknownError";
+    console.error("Brunch verification code request failed", { failure });
     return NextResponse.json({ ok: false }, { status: 503 });
   }
 }
