@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -9,7 +9,10 @@ import {
   Phone,
   Users,
 } from "lucide-react";
-import type { Locale } from "../data/site-content";
+import Link from "next/link";
+import { localizedRoutes, type Locale } from "../data/site-content";
+import { allergyConsent, bookingTermsLinkLabel, brunchTermsVersion, cancellationRule, legalContent } from "../data/legal-content";
+import verificationCopy from "../data/brunch-verification-copy";
 import { trackEvent } from "../lib/analytics";
 import {
   formatPublishedOfferLabel,
@@ -47,6 +50,7 @@ type FormState = {
   email: string;
   phone: string;
   allergies: string;
+  allergyConsent: boolean;
   partySize: string;
   offerId: string;
 };
@@ -58,6 +62,7 @@ const defaultForm: FormState = {
   email: "",
   phone: "",
   allergies: "",
+  allergyConsent: false,
   partySize: "2",
   offerId: "",
 };
@@ -86,9 +91,10 @@ const labelsByLocale: Record<
     detailsTitle: string;
     confirmTitle: string;
     confirmBody: string;
-    confirmCancelRule: string;
     confirmBack: string;
     confirmOk: string;
+    paymentNote: string;
+    bookingTotal: string;
     offer: string;
     menuTitle: string;
     noMenu: string;
@@ -128,10 +134,10 @@ const labelsByLocale: Record<
     confirmTitle: "Avant de confirmer",
     confirmBody:
       "Tous nos produits sont faits maison et préparés spécialement pour le brunch.",
-    confirmCancelRule:
-      "Aucune annulation n'est possible moins de 24h avant la réservation.",
     confirmBack: "Modifier",
-    confirmOk: "J'ai compris, confirmer",
+    confirmOk: "Confirmer avec obligation de paiement",
+    paymentNote: "Aucun montant n’est débité lors de la confirmation.",
+    bookingTotal: "Total de la réservation",
     offer: "Offre brunch",
     menuTitle: "Menu du brunch",
     noMenu: "Le menu sera publié prochainement. Vous pouvez déjà réserver.",
@@ -172,10 +178,10 @@ const labelsByLocale: Record<
     confirmTitle: "Before confirming",
     confirmBody:
       "All our products are homemade and prepared specially for brunch.",
-    confirmCancelRule:
-      "Cancellations are not possible less than 24h before the booking.",
     confirmBack: "Edit",
-    confirmOk: "I understand, confirm",
+    confirmOk: "Confirm with obligation to pay",
+    paymentNote: "No payment is taken when you confirm.",
+    bookingTotal: "Booking total",
     offer: "Brunch offer",
     menuTitle: "Brunch menu",
     noMenu: "The menu will be published soon. You can already book your table.",
@@ -216,10 +222,10 @@ const labelsByLocale: Record<
     confirmTitle: "Ennen vahvistusta",
     confirmBody:
       "Kaikki tuotteemme ovat kotitekoisia ja valmistetaan brunssia varten.",
-    confirmCancelRule:
-      "Peruutus ei ole mahdollinen alle 24 tuntia ennen varausta.",
     confirmBack: "Muokkaa",
-    confirmOk: "Ymmärrän, vahvista",
+    confirmOk: "Vahvista varaus, johon liittyy maksuvelvollisuus",
+    paymentNote: "Vahvistuksen yhteydessä ei veloiteta maksua.",
+    bookingTotal: "Varauksen kokonaishinta",
     offer: "Brunssitarjous",
     menuTitle: "Brunssimenu",
     noMenu: "Brunssimenu julkaistaan pian. Voit varata pöydän jo nyt.",
@@ -255,12 +261,20 @@ function getReservationService(time: string) {
 
 export default function BrunchReservationForm({ locale }: { locale: Locale }) {
   const labels = labelsByLocale[locale] ?? labelsByLocale.fr;
+  const verificationLabels = verificationCopy[locale];
   const [dates, setDates] = useState<BrunchDate[]>([]);
   const [offer, setOffer] = useState<BrunchOffer | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState<FormState>(defaultForm);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [challenge, setChallenge] = useState<{ id: string; email: string; previewCode?: string } | null>(null);
+  const [emailCode, setEmailCode] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [codeSending, setCodeSending] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const currentChallenge = challenge?.email === form.email.trim() ? challenge : null;
   const [menuItems, setMenuItems] = useState<BrunchMenuItem[]>([]);
   const [datesError, setDatesError] = useState(false);
   const [menuError, setMenuError] = useState(false);
@@ -350,16 +364,48 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
     };
   }, [form.date, locale]);
 
+  async function requestEmailCode() {
+    if (codeSending || !formRef.current) return;
+    const email = form.email.trim();
+    setCodeSending(true);
+    setVerificationError("");
+    try {
+      const response = await fetch("/api/brunch/email-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, locale, companyWebsite: new FormData(formRef.current).get("companyWebsite") }),
+      });
+      if (response.status === 429) {
+        setVerificationError(verificationLabels.wait);
+        return;
+      }
+      if (!response.ok) throw new Error("code_delivery_failed");
+      const result = await response.json() as { id: string; previewCode?: string };
+      setChallenge({ ...result, email });
+      setEmailCode("");
+    } catch {
+      setVerificationError(verificationLabels.sendError);
+    } finally {
+      setCodeSending(false);
+    }
+  }
+
   async function sendReservation(choice?: "alternate" | "waitlist") {
-    if (sending) return;
+    if (sending || !formRef.current?.reportValidity() || !currentChallenge || !acceptedTerms) return;
     setSending(true);
     setMessage(null);
+    setVerificationError("");
+    let keepConfirmationOpen = false;
     try {
       const response = await fetch("/api/brunch/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          verificationId: currentChallenge.id,
+          emailCode,
+          acceptedTerms: brunchTermsVersion,
+          companyWebsite: new FormData(formRef.current).get("companyWebsite"),
           locale,
           availabilityChoice: choice,
           alternateTime:
@@ -367,6 +413,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as {
+        error?: string;
         placement?: string;
         finalTime?: string;
         requestedTime?: string;
@@ -377,6 +424,12 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
           requestedTime: payload.requestedTime || form.time,
           alternateTime: payload.alternateTime || "",
         });
+        return;
+      }
+      if (payload.error === "code_invalid" || payload.error === "code_unavailable" || payload.error === "terms_required") {
+        if (choice) setSlotConflict(null);
+        setVerificationError(verificationLabels.invalid);
+        keepConfirmationOpen = true;
         return;
       }
       if (!response.ok) throw new Error("reservation_failed");
@@ -403,11 +456,14 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         offerId: prev.offerId,
       }));
       setSlotConflict(null);
+      setChallenge(null);
+      setEmailCode("");
+      setAcceptedTerms(false);
     } catch {
       setMessage({ kind: "error", text: labels.error });
     } finally {
       setSending(false);
-      setConfirmOpen(false);
+      setConfirmOpen(keepConfirmationOpen);
     }
   }
 
@@ -419,6 +475,8 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         source: "brunch_reservation_form",
         reservation_service: getReservationService(form.time),
       });
+      setSlotConflict(null);
+      setVerificationError("");
       setConfirmOpen(true);
       return;
     }
@@ -445,6 +503,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
 
   return (
     <form
+      ref={formRef}
       onSubmit={submit}
       className="grid gap-px bg-espresso/10 lg:grid-cols-[0.8fr_1.2fr]"
     >
@@ -527,7 +586,8 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      <div className="bg-white p-8 md:p-10">
+      <div className="min-w-0 bg-white p-8 md:p-10">
+        <input type="text" name="companyWebsite" autoComplete="off" tabIndex={-1} hidden />
         <p className="mb-6 text-[0.65rem] font-medium uppercase tracking-[0.3em] text-cafe">
           {labels.detailsTitle}
         </p>
@@ -539,6 +599,8 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
             <input
               className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
               required
+              autoComplete="name"
+              maxLength={120}
               value={form.fullName}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, fullName: event.target.value }))
@@ -555,10 +617,15 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
                 className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
                 type="email"
                 required
+                autoComplete="email"
+                maxLength={254}
                 value={form.email}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, email: event.target.value }))
-                }
+                onChange={(event) => {
+                  setChallenge(null);
+                  setEmailCode("");
+                  setSlotConflict(null);
+                  setForm((prev) => ({ ...prev, email: event.target.value }));
+                }}
               />
             </label>
             <label>
@@ -569,6 +636,10 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
               <input
                 className="w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
                 required
+                type="tel"
+                autoComplete="tel"
+                minLength={5}
+                maxLength={40}
                 value={form.phone}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, phone: event.target.value }))
@@ -622,12 +693,33 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
             </span>
             <textarea
               className="min-h-28 w-full border border-espresso/15 px-4 py-3 outline-none focus:border-gold"
+              maxLength={1000}
               value={form.allergies}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, allergies: event.target.value }))
               }
             />
           </label>
+          {form.allergies.trim() && (
+            <label className="flex items-start gap-2 text-sm text-espresso/80">
+              <input
+                type="checkbox"
+                required
+                className="mt-1 accent-espresso"
+                checked={form.allergyConsent}
+                onChange={(event) => setForm((prev) => ({ ...prev, allergyConsent: event.target.checked }))}
+              />
+              <span>{allergyConsent[locale]}</span>
+            </label>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            <Link className="underline underline-offset-4" href={`/${locale}/${localizedRoutes.privacy[locale]}`}>
+              {legalContent[locale].privacy.title}
+            </Link>
+            <Link className="underline underline-offset-4" href={`/${locale}/${localizedRoutes.terms[locale]}`}>
+              {bookingTermsLinkLabel[locale]}
+            </Link>
+          </div>
         </div>
 
         {message ? (
@@ -680,12 +772,65 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
         </button>
         {confirmOpen ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-espresso/70 p-4">
-            <div className="max-w-lg bg-white p-8 text-espresso shadow-2xl">
+            <div className="max-h-[90svh] max-w-lg overflow-y-auto bg-white p-5 text-espresso shadow-2xl sm:p-8">
               <h3 className="font-serif text-3xl">{labels.confirmTitle}</h3>
               <p className="mt-4 text-espresso/75">{labels.confirmBody}</p>
+              {offer && (
+                <p className="mt-3 text-sm text-espresso/75">
+                  {formatDate(form.date, locale)} · {form.time} · {form.partySize} {labels.people}<br />
+                  {labels.bookingTotal}{": "}
+                  {(offer.pricePerPerson * Number(form.partySize)).toLocaleString(locale, { maximumFractionDigits: 2 })}{" "}
+                  {offer.currency === "EUR" ? "€" : offer.currency}
+                </p>
+              )}
               <p className="mt-3 font-semibold text-espresso">
-                {labels.confirmCancelRule}
+                {cancellationRule[locale]}
               </p>
+              <p className="mt-3 text-sm text-espresso/75">{labels.paymentNote}</p>
+              <div className="mt-5 space-y-3 border-t border-espresso/15 pt-4 text-sm">
+                <p className="break-all font-medium">{form.email.trim()}</p>
+                <p className="text-espresso/75">{currentChallenge ? verificationLabels.sent : verificationLabels.prompt}</p>
+                {currentChallenge?.previewCode && (
+                  <p className="font-medium">{verificationLabels.demo} · {currentChallenge.previewCode}</p>
+                )}
+                {currentChallenge && (
+                  <label className="block">
+                    <span className="mb-1 block">{verificationLabels.field}</span>
+                    <input
+                      className="w-full border border-espresso/20 px-3 py-2 tracking-widest"
+                      value={emailCode}
+                      onChange={(event) => setEmailCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
+                    />
+                  </label>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void requestEmailCode()}
+                  disabled={codeSending || sending}
+                  className="border border-espresso/25 px-4 py-2 hover:bg-linen disabled:opacity-60"
+                >
+                  {codeSending ? verificationLabels.sending : currentChallenge ? verificationLabels.resend : verificationLabels.send}
+                </button>
+                {verificationError && <p role="alert" className="text-red-800">{verificationError}</p>}
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    className="mt-1 accent-espresso"
+                    checked={acceptedTerms}
+                    onChange={(event) => setAcceptedTerms(event.target.checked)}
+                  />
+                  <span>
+                    {verificationLabels.accept}{" "}
+                    <Link className="underline underline-offset-4" href={`/${locale}/${localizedRoutes.terms[locale]}`} target="_blank" rel="noopener">
+                      {verificationLabels.readTerms}
+                    </Link>
+                  </span>
+                </label>
+              </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
@@ -696,7 +841,7 @@ export default function BrunchReservationForm({ locale }: { locale: Locale }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={sending || codeSending || !currentChallenge || emailCode.length !== 6 || !acceptedTerms}
                   className="flex-1 bg-espresso px-5 py-3 text-xs uppercase tracking-[0.2em] text-white disabled:opacity-60"
                 >
                   {sending ? labels.sending : labels.confirmOk}

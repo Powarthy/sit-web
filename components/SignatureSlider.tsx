@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,13 +38,10 @@ export default function SignatureSlider() {
               exit={{ opacity: 0, scale: 1 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
               className="absolute inset-0 w-full h-full"
-              style={{
-                backgroundImage: `url(${src})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                filter: "grayscale(10%) contrast(105%)"
-              }}
-            />
+              style={{ filter: "grayscale(10%) contrast(105%)" }}
+            >
+              <Image src={src} alt="" fill sizes="(max-width: 767px) calc(100vw - 3rem), (max-width: 1023px) 672px, 55vw" className="object-cover" />
+            </motion.div>
           )
         ))}
       </AnimatePresence>

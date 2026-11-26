@@ -1,10 +1,14 @@
 "use client";
 
+import Image from "next/image";
+
 import { useCallback, useEffect, useState } from "react";
 import type { Locale } from "../data/site-content";
 
 type GalleryImage = {
   src: string;
+  width: number;
+  height: number;
   alt: string;
   caption?: string;
 };
@@ -79,9 +83,11 @@ export default function GalleryClient({
               aria-label={img.alt}
             >
               <div className="relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={img.src}
+                  width={img.width}
+                  height={img.height}
+                  sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1023px) 45vw, (max-width: 1535px) 30vw, 475px"
                   alt={img.alt}
                   loading={index < 3 ? "eager" : "lazy"}
                   className="w-full h-auto object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
@@ -144,9 +150,11 @@ export default function GalleryClient({
             className="relative max-h-[85vh] max-w-[92vw] md:max-w-[80vw]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={images[activeIndex].src}
+              width={images[activeIndex].width}
+              height={images[activeIndex].height}
+              sizes="(max-width: 767px) 92vw, 80vw"
               alt={images[activeIndex].alt}
               className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl animate-[fadeIn_.4s_ease-out]"
             />

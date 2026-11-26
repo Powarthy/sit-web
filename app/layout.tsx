@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { siteSettings } from "../data/site-content";
-import GoogleAnalytics from "../components/GoogleAnalytics";
+import { headers } from "next/headers";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -19,16 +19,16 @@ export const metadata = {
   metadataBase: new URL(siteSettings.siteUrl)
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  const locale = (await headers()).get("x-site-locale") ?? "fr";
   return (
-    <html lang="fr" className={`${serif.variable} ${sans.variable}`}>
+    <html lang={locale} className={`${serif.variable} ${sans.variable}`}>
       <body className="bg-linen text-espresso">
         {children}
-        <GoogleAnalytics />
       </body>
     </html>
   );

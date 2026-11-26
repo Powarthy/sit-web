@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { siteSettings } from "../data/site-content";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/"
     },
-    sitemap: "https://thefrenchcafe.fi/sitemap.xml"
+    sitemap: `${siteSettings.siteUrl}/sitemap.xml`
   };
 }

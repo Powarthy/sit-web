@@ -1,4 +1,6 @@
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-LQNTC8XB1B";
+import { getAnalyticsChoice } from "./cookie-consent";
+
+export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-LQNTC8XB1B";
 
 export type AnalyticsEventName =
   | "brunch_reservation_started"
@@ -21,16 +23,30 @@ declare global {
 }
 
 export function hasAnalyticsConsent() {
-  // TODO: connect this to the future analytics cookie consent banner before loading/sending GA4.
-  return true;
+  return typeof window !== "undefined" && getAnalyticsChoice() === "accepted";
+}
+
+export function setMeasurementDisabled(disabled: boolean) {
+  Object.assign(window, { [`ga-disable-${GA_MEASUREMENT_ID}`]: disabled });
+  if (!disabled) return;
+
+  for (const cookie of document.cookie.split(";")) {
+    const name = cookie.trim().split("=")[0];
+    if (name !== "_ga" && !name.startsWith("_ga_")) continue;
+    document.cookie = `${name}=; Max-Age=0; Path=/`;
+    document.cookie = `${name}=; Max-Age=0; Path=/; Domain=${window.location.hostname}`;
+    if (window.location.hostname.endsWith(".kahvilathefrench.cafe")) {
+      document.cookie = `${name}=; Max-Age=0; Path=/; Domain=kahvilathefrench.cafe`;
+    }
+  }
 }
 
 export function trackPageView(path: string) {
   if (typeof window === "undefined" || !GA_MEASUREMENT_ID || !hasAnalyticsConsent()) return;
 
-  window.gtag?.("config", GA_MEASUREMENT_ID, {
+  window.gtag?.("event", "page_view", {
     page_path: path,
-    page_location: window.location.href
+    page_location: `${window.location.origin}${path}`
   });
 }
 

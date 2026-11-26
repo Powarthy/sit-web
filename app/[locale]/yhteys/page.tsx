@@ -52,14 +52,14 @@ export default async function ContactPageFi(props: { params: Promise<{ locale: L
     <div className="pb-24 space-y-16">
       <PageIntro title={content.contactPage.title} description={content.contactPage.intro} />
 
-      <section className="container grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="container grid grid-cols-1 gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-3xl border border-latte bg-white/80 p-8 shadow-card space-y-6">
           <SectionTitle eyebrow="Yhteystietomme" title="Meidät löydät…" />
           <div className="space-y-3 text-espresso/70">
             {content.contactPage.methods.map((method) => (
-              <div key={method.label} className="flex items-center justify-between border-b border-latte pb-3">
+              <div key={method.label} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-latte pb-3">
                 <span className="uppercase tracking-[0.2em] text-[0.7rem] text-cafe">{method.label}</span>
-                <span className="font-medium text-espresso text-[0.98rem] md:text-base">{method.value}</span>
+                <span className="min-w-0 [overflow-wrap:anywhere] font-medium text-espresso text-[0.98rem] md:text-base">{method.value}</span>
               </div>
             ))}
           </div>
@@ -73,7 +73,7 @@ export default async function ContactPageFi(props: { params: Promise<{ locale: L
               Sähköposti
             </TrackedAnchor>
             <TrackedAnchor
-              href={`tel:${siteSettings.phone}`}
+              href={`tel:${siteSettings.phoneInternational}`}
               eventName="contact_clicked"
               eventParams={{ language: params.locale, source: "contact_page", button_location: "phone" }}
               className="rounded-full border border-espresso px-5 py-2 text-[0.7rem] uppercase tracking-[0.22em] text-espresso hover:bg-espresso hover:text-cream transition"

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import EventHighlight from "../../components/EventHighlight";
-import OfferCard from "../../components/OfferCard";
-import OpeningHours from "../../components/OpeningHours";
-import SectionTitle from "../../components/SectionTitle";
 import FadeIn from "../../components/FadeIn";
 import SignatureSlider from "../../components/SignatureSlider";
 import { TrackedLink } from "../../components/TrackedLink";
@@ -19,7 +17,6 @@ import {
   getLocaleContent,
   getRouteAlternates,
   localizedRoutes,
-  locationByLocale,
   ogImageUrl,
   siteSettings
 } from "../../data/site-content";
@@ -93,7 +90,7 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
       addressLocality: "Kuusamo",
       addressCountry: "FI"
     },
-    telephone: siteSettings.phone,
+    telephone: siteSettings.phoneInternational,
     url: siteSettings.siteUrl,
     sameAs: [siteSettings.instagramUrl],
     openingHours: siteSettings.openingHours.map((item) => `${item.day} ${item.hours}`),
@@ -220,13 +217,13 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
       {/* HAUTE COUTURE HERO SECTION */}
       <section className="relative w-full min-h-[100svh] flex flex-col justify-start overflow-hidden">
         {/* Background Image full bleed */}
-        <div 
-          className="absolute inset-0 w-full h-full scale-[1.02] transform transition-transform duration-[20s] ease-out hover:scale-[1.05]"
-          style={{
-            backgroundImage: `url(${siteSettings.heroImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center 30%"
-          }}
+        <Image
+          src={siteSettings.heroImage}
+          alt=""
+          fill
+          preload
+          sizes="100vw"
+          className="scale-[1.02] object-cover object-[center_30%] transition-transform duration-[20s] ease-out hover:scale-[1.05]"
         />
         {/* Elegant gradient overlay - LIGHT FOR BLACK TEXT */}
         {/* Un léger dégradé clair plus bas, et un voile clair plus marqué en haut pour lire le header noir */}
@@ -234,7 +231,7 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
         
         {/* Hero Content */}
         <div className="relative z-10 w-full px-6 md:px-12 lg:px-24 pt-40 md:pt-48 lg:pt-56">
-          <FadeIn direction="up" delay={0.2} className="w-full">
+          <div className="w-full">
             <div className="flex flex-col gap-6">
               <h1 className="text-espresso font-serif text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.9] tracking-tight max-w-2xl lg:max-w-4xl">
                 {content.hero.headline}
@@ -243,7 +240,7 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
                 <p className="text-espresso/80 font-light text-lg md:text-xl max-w-md leading-relaxed">
                   {content.hero.subhead}
                 </p>
-                <div className="flex gap-4 md:justify-end">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-3 md:justify-end">
                   <TrackedLink
                     href={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`}
                     eventName="brunch_reservation_started"
@@ -256,14 +253,14 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
                     href={`/${params.locale}/menu`}
                     eventName="menu_viewed"
                     eventParams={{ language: params.locale, source: "home_hero", button_location: "hero_secondary" }}
-                    className="flex items-center justify-center border border-espresso/30 bg-white text-espresso px-8 py-4 text-xs uppercase tracking-[0.25em] transition-all hover:bg-espresso/5 hover:border-espresso"
+                    className="inline-flex items-center py-2 text-xs font-medium uppercase tracking-[0.2em] text-espresso underline underline-offset-4 transition-colors hover:text-cafe"
                   >
                     {content.hero.secondaryCta}
                   </TrackedLink>
                 </div>
               </div>
             </div>
-          </FadeIn>
+          </div>
         </div>
       </section>
 
@@ -389,14 +386,14 @@ export default async function HomePage(props: { params: Promise<{ locale: Locale
                 </p>
               ))}
             </div>
-            <div className="mt-16 pt-8 border-t border-espresso/10 grid grid-cols-2 gap-8">
+            <div className="mt-16 pt-8 border-t border-espresso/10 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 sm:gap-8">
                <div>
                  <p className="text-xs uppercase tracking-[0.2em] text-cafe mb-2 flex items-center gap-2"><MapPin className="w-3 h-3"/>{ctaLabels.address}</p>
                  <p className="font-medium">{siteSettings.address}</p>
                </div>
                <div>
                  <p className="text-xs uppercase tracking-[0.2em] text-cafe mb-2 flex items-center gap-2"><Phone className="w-3 h-3"/>{ctaLabels.contact}</p>
-                 <p className="font-medium">{siteSettings.phone}</p>
+                 <p className="font-medium [overflow-wrap:anywhere]">{siteSettings.phone}</p>
                </div>
             </div>
           </FadeIn>
