@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Locale, locales } from "../data/site-content";
+import { Locale, locales, localizedRoutes } from "../data/site-content";
 import { trackEvent } from "../lib/analytics";
 
 const localeFlags: Record<Locale, string> = {
@@ -19,7 +18,9 @@ const localeNames: Record<Locale, string> = {
 };
 
 const withLocale = (pathname: string, currentLocale: Locale, nextLocale: Locale) => {
-  if (pathname === `/${currentLocale}`) return `/${nextLocale}`;
+  const slug = pathname.slice(currentLocale.length + 1).replace(/^\//, "");
+  const route = Object.values(localizedRoutes).find((item) => item[currentLocale] === slug);
+  if (route) return `/${nextLocale}${route[nextLocale] ? `/${route[nextLocale]}` : ""}`;
   if (pathname.startsWith(`/${currentLocale}/`)) {
     return pathname.replace(`/${currentLocale}/`, `/${nextLocale}/`);
   }
@@ -88,7 +89,7 @@ export default function LanguageSwitcher({
           {locales.map((locale) => {
             const targetPath = withLocale(currentPath, currentLocale, locale);
             return (
-              <Link
+              <a
                 key={locale}
                 href={targetPath}
                 role="menuitem"
@@ -109,7 +110,7 @@ export default function LanguageSwitcher({
               >
                 <span className="text-base leading-none">{localeFlags[locale]}</span>
                 <span>{localeNames[locale]}</span>
-              </Link>
+              </a>
             );
           })}
         </div>

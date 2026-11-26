@@ -1,3 +1,5 @@
+import { CookiePreferencesButton } from "./CookieConsent";
+import { bookingTermsLinkLabel, legalContent } from "../data/legal-content";
 import Link from "next/link";
 import { Locale, getLocaleNavigation, localizedRoutes, siteSettings } from "../data/site-content";
 import { getPublicHoursForLocale } from "../lib/planning-hours";
@@ -19,7 +21,7 @@ export default async function Footer({
   };
   return (
     <footer className="bg-espresso text-cream relative overflow-hidden">
-      <div className="absolute inset-0 bg-footer-glow opacity-60" />
+      <div className="pointer-events-none absolute inset-0 bg-footer-glow opacity-60" />
       <div className="container relative py-16 grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="space-y-5">
           <h3 className="font-serif text-3xl">The French Café</h3>
@@ -77,6 +79,15 @@ export default async function Footer({
       <div className="border-t border-cream/20">
         <div className="container py-4 text-[0.75rem] text-cream/60 flex flex-col md:flex-row md:justify-between gap-3">
           <span>{content.rights}</span>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-cream/80">
+            <Link href={`/${locale}/${localizedRoutes.privacy[locale]}`} className="underline underline-offset-4 hover:text-cream">
+              {legalContent[locale].privacy.title}
+            </Link>
+            <Link href={`/${locale}/${localizedRoutes.terms[locale]}`} className="underline underline-offset-4 hover:text-cream">
+              {bookingTermsLinkLabel[locale]}
+            </Link>
+            <CookiePreferencesButton locale={locale} />
+          </div>
           <span>© {new Date().getFullYear()} The French Café</span>
         </div>
       </div>

@@ -19,18 +19,21 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
     seoTitle: "Galerie | The French Café Kuusamo",
     seoDescription: "Découvrez en images les pâtisseries, cafés et ambiances de The French Café à Kuusamo.",
     captions: [
-      "Pâtisseries du jour",
-      "Croissants feuilletés",
-      "Cafés de spécialité",
-      "Dressage signature",
-      "Bar à desserts",
-      "Ambiance du matin",
-      "Brunch dominical",
-      "Créations saisonnières",
-      "L'art du détail",
-      "La salle en lumière",
-      "Boissons signatures",
-      "Mise en scène gourmande"
+      "Façade éclairée du café",
+      "Un serveur dans la salle du café",
+      "Présentoir de brunch avec thé",
+      "Brunch à trois étages",
+      "Viennoiseries au comptoir",
+      "Glaçage au pinceau",
+      "Pâtons roulés avant cuisson",
+      "Tartelettes garnies d’orange",
+      "Pâte feuilletée repliée",
+      "Farine saupoudrée sur des pâtons",
+      "Brunch servi à table",
+      "Présentoir garni de pâtisseries",
+      "Brunch et verre de jus d’orange",
+      "Pâtissier présentant une boîte de desserts",
+      "Cappuccino et viennoiserie"
     ]
   },
   en: {
@@ -41,18 +44,21 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
     seoTitle: "Gallery | The French Café Kuusamo",
     seoDescription: "Discover the pastries, coffees and atmosphere of The French Café in Kuusamo through our visual gallery.",
     captions: [
-      "Today's pastries",
-      "Buttery croissants",
-      "Specialty coffees",
-      "Signature plating",
-      "Dessert bar",
-      "Morning atmosphere",
-      "Sunday brunch",
-      "Seasonal creations",
-      "The art of detail",
-      "The room in daylight",
-      "Signature drinks",
-      "Gourmet staging"
+      "The café’s illuminated storefront",
+      "A server in the café dining room",
+      "Tiered brunch stand with tea",
+      "Three-tier brunch spread",
+      "Pastries on the counter",
+      "Glaze being brushed onto pastry",
+      "Rolled dough before baking",
+      "Tartlets topped with orange slices",
+      "Folded puff pastry dough",
+      "Flour dusted over shaped dough",
+      "Brunch served at a table",
+      "Tiered stand filled with pastries",
+      "Brunch with a glass of orange juice",
+      "Pastry chef presenting a dessert box",
+      "Cappuccino and a pastry"
     ]
   },
   fi: {
@@ -63,39 +69,42 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
     seoTitle: "Galleria | The French Café Kuusamo",
     seoDescription: "Tutustu The French Cafén leivonnaisiin, kahveihin ja tunnelmaan Kuusamossa visuaalisen gallerian kautta.",
     captions: [
-      "Päivän leivonnaiset",
-      "Voiset croissantit",
-      "Erikoiskahvit",
-      "Signature-asettelu",
-      "Jälkiruokabaari",
-      "Aamun tunnelma",
-      "Sunnuntain brunssi",
-      "Kausiluomukset",
-      "Yksityiskohtien taide",
-      "Sali päivänvalossa",
-      "Signature-juomat",
-      "Gourmet-esillepano"
+      "Kahvilan valaistu julkisivu",
+      "Tarjoilija kahvilasalissa",
+      "Brunssitarjotin ja teekannu",
+      "Kolmikerroksinen brunssitarjotin",
+      "Leivonnaisia tiskillä",
+      "Leivonnaisen voitelu siveltimellä",
+      "Rullatut taikinapalat ennen paistamista",
+      "Appelsiiniviipaleilla koristeltuja tartaletteja",
+      "Taiteltu lehtitaikina",
+      "Jauhojen sirottelu muotoillulle taikinalle",
+      "Pöytään tarjoiltu brunssi",
+      "Leivonnaisia kerrostarjottimella",
+      "Brunssi ja lasillinen appelsiinimehua",
+      "Kondiittori esittelee leivosrasiaa",
+      "Cappuccino ja leivonnainen"
     ]
   }
 };
 
 const imageFiles = [
-  "French_Cafe_stillit9.webp",
-  "French_Cafe_stillit11.webp",
-  "French_Cafe_stillit26.webp",
-  "French_Cafe_stillit27.webp",
-  "French_Cafe_stillit33.webp",
-  "French_Cafe_stillit39.webp",
-  "French_Cafe_stillit42.webp",
-  "French_Cafe_stillit44.webp",
-  "French_Cafe_stillit45.webp",
-  "French_Cafe_stillit69.webp",
-  "French_Cafe_stillit74.webp",
-  "French_Cafe_stillit75.webp",
-  "French_Cafe_stillit32.webp",
-  "French_Cafe_stillit34.webp",
-  "boissons.webp"
-];
+  ["French_Cafe_stillit9.webp", 2000, 1125],
+  ["French_Cafe_stillit11.webp", 2400, 2400],
+  ["French_Cafe_stillit26.webp", 2400, 3000],
+  ["French_Cafe_stillit27.webp", 2400, 4266],
+  ["French_Cafe_stillit33.webp", 2400, 3198],
+  ["French_Cafe_stillit39.webp", 2400, 4267],
+  ["French_Cafe_stillit42.webp", 2400, 3000],
+  ["French_Cafe_stillit44.webp", 2400, 3000],
+  ["French_Cafe_stillit45.webp", 2400, 4267],
+  ["French_Cafe_stillit69.webp", 2400, 3198],
+  ["French_Cafe_stillit74.webp", 2400, 4267],
+  ["French_Cafe_stillit75.webp", 2400, 4267],
+  ["French_Cafe_stillit32.webp", 2400, 3198],
+  ["French_Cafe_stillit34.webp", 2400, 4267],
+  ["boissons.webp", 2400, 3200]
+] as const;
 
 export function generateGalleryMetadata(locale: Locale): Metadata {
   const c = copy[locale];
@@ -121,10 +130,12 @@ export function generateGalleryMetadata(locale: Locale): Metadata {
 
 export default function GalleryPage({ locale }: { locale: Locale }) {
   const c = copy[locale];
-  const images = imageFiles.map((file, i) => ({
+  const images = imageFiles.map(([file, width, height], i) => ({
     src: `/images/diapo/${file}`,
-    alt: `${c.captions[i % c.captions.length]} – The French Café`,
-    caption: c.captions[i % c.captions.length]
+    width,
+    height,
+    alt: `${c.captions[i]} – The French Café`,
+    caption: c.captions[i]
   }));
 
   return (

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import CookieConsent from "../../components/CookieConsent";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { locales, siteSettings, getLocaleContent, getLocaleNavigation, localizedRoutes, Locale } from "../../data/site-content";
@@ -39,6 +41,8 @@ export default async function LocaleLayout(
 ) {
   const params = (await props.params) as { locale: Locale };
 
+  if (!locales.includes(params.locale)) notFound();
+
   const {
     children
   } = props;
@@ -51,6 +55,7 @@ export default async function LocaleLayout(
       <Header locale={params.locale} navigation={navigation} reservationUrl={`/${params.locale}/${localizedRoutes.brunch[params.locale]}`} />
       <main className="flex-1">{children}</main>
       <Footer locale={params.locale} content={content.footer} />
+      <CookieConsent locale={params.locale} />
     </div>
   );
 }

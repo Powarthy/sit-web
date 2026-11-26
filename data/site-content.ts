@@ -9,6 +9,7 @@ export const siteSettings = {
   siteUrl: "https://kahvilathefrench.cafe",
   address: "Kitkantie 2, 93600 Kuusamo",
   phone: "+358(0)504369455",
+  phoneInternational: "+358504369455",
   email: "info@kahvilathefrench.cafe",
   heroImage: "/images/1.webp",
   heroImageAlt: "Pâtisseries fraîches et café servi sur une table lumineuse",
@@ -90,7 +91,9 @@ export const localizedRoutes = {
   gallery: { fr: "gallerie", en: "gallery", fi: "galleria" },
   contact: { fr: "contact", en: "contact", fi: "yhteys" },
   about: { fr: "a-propos", en: "about", fi: "meista" },
-  catering: { fr: "catering", en: "catering", fi: "catering" }
+  catering: { fr: "catering", en: "catering", fi: "catering" },
+  privacy: { fr: "confidentialite", en: "privacy", fi: "tietosuoja" },
+  terms: { fr: "conditions-generales", en: "booking-terms", fi: "varausehdot" }
 } as const;
 
 export const buildLocalizedUrl = (locale: Locale, slug: string) =>
@@ -257,7 +260,7 @@ export const content: Record<Locale, PageContent> = {
       badge: "Maison artisanale",
       headline: "L'art de vivre café & pâtisserie à Kuusamo",
       subhead: "Pâtisserie fine, café de spécialité et accueil sincère — une maison chaleureuse où l'on prend le temps.",
-      primaryCta: "Réserver une table",
+      primaryCta: "Réserver le brunch",
       secondaryCta: "Découvrir la carte",
       imageLabel: "La maison",
       imageCaption: "Lumière du matin, pâtisseries fraîches, tables délicates.",
@@ -439,48 +442,48 @@ export const content: Record<Locale, PageContent> = {
       cta: "Demander un devis"
     },
     aboutPage: {
-      title: "Meist?",
-      intro: "Kuusamossa sijaitseva ranskalainen kahvila, jossa ranskalainen palvelu ja pohjoiset raaka-aineet kohtaavat.",
+      title: "À propos",
+      intro: "À Kuusamo, notre café réunit le savoir-faire français et les produits du Nord.",
       sections: [
         {
-          title: "The French Caf?n tarina",
+          title: "L’histoire de The French Café",
           image: "/images/story-cafe.jpg",
-          imageAlt: "Kahvilan l?mmin tunnelma",
+          imageAlt: "L’ambiance chaleureuse du café",
           paragraphs: [
-            "The French Caf? syntyi yksinkertaisesta mutta kunnianhimoisesta ideasta: luoda Kuusamoon l?mmin, hienostunut talo, jossa leivonnaiset, kahvi ja vieraanvaraisuus muodostavat kokonaisuuden.",
-            "Tarina alkaa joulukuussa 2020, er??n? talvip?iv?n? Kuusamossa. Kahvikupin ??rell? ajatuksesta kasvoi v?hitellen ranskalais-suomalaisen pariskunnan el?m?nprojekti. Yli kahden vuoden valmistelun j?lkeen The French Caf? avasi ovensa huhtikuussa 2023 Kuusamon keskustassa.",
-            "Alusta asti halusimme rakentaa enemm?n kuin kahvilan: talon, joka heijastaa tapaamme tehd?, vastaanottaa ja luoda. T?m? perusta m??ritt?? yh? The French Caf?n hengen."
+            "The French Café est né d’une idée simple mais ambitieuse, celle de créer à Kuusamo un lieu chaleureux et raffiné où pâtisserie, café et hospitalité se retrouvent.",
+            "L’histoire commence en décembre 2020, par une journée d’hiver à Kuusamo. Au fil des conversations autour d’un café, l’idée est devenue le projet de vie d’un couple franco-finlandais. Après plus de deux ans de préparation, The French Café a ouvert ses portes en avril 2023, au centre de Kuusamo.",
+            "Dès le départ, nous avons voulu créer une maison qui reflète notre façon de travailler, d’accueillir et de créer. Cette intention anime toujours The French Café."
           ]
         },
         {
           title: "Moona Mankinen",
           image: "/images/moona.jpg",
-          imageAlt: "Moona Mankinen ty?ss??n",
+          imageAlt: "Moona Mankinen au travail",
           paragraphs: [
-            "Lukion j?lkeen Moona seurasi kutsumustaan ja ryhtyi leivontaopintoihin. H?n l?hti kes?harjoitteluun Nizzaan, jonka piti kest?? kolme kuukautta, mutta matka venyi yli kuudeksi vuodeksi. H?n kouluttautui paikallisessa hotelli- ja ravintola-alan oppilaitoksessa leipuri-kondiittoriksi ja erikoistui j?lkiruokiin.",
-            "H?n ty?skenteli useissa ravintoloissa, mukaan lukien arvostetussa Le Negrescossa. Erityisen merkitt?v? kokemus oli Le Chanteclerissa, Michelin-t?hdell? palkitussa fine dining -ravintolassa, jossa h?n kehitti luovuuttaan ja johti p?tisserie-tiimi?. Moona vastaa The French Caf?n keitti?st? ja leivonnaisista."
+            "Après le lycée, Moona a suivi sa vocation et s’est formée à la boulangerie-pâtisserie. Elle est partie à Nice pour un stage d’été de trois mois et y est finalement restée plus de six ans. Elle s’est formée au métier de boulangère-pâtissière dans une école hôtelière locale, puis s’est spécialisée dans les desserts.",
+            "Moona a travaillé dans plusieurs restaurants, dont ceux de l’hôtel Le Negresco. Au Chantecler, restaurant gastronomique distingué par le guide Michelin, elle a développé sa créativité et dirigé l’équipe de pâtisserie. Aujourd’hui, elle est responsable de la cuisine et des pâtisseries de The French Café."
           ]
         },
         {
           title: "Arthur Bataille",
           image: "/images/Arthur.jpg",
-          imageAlt: "Arthur Bataille salissa",
+          imageAlt: "Arthur Bataille en salle",
           paragraphs: [
-            "Arthur on kotoisin Mardi?sta, Orl?ansin l?helt? Keski-Ranskasta - alueelta, joka tunnetaan linnoistaan, viineist??n ja hedelmist??n. H?n valitsi varhain hotelli- ja ravintola-alan, aloitti keitti?opinnoilla ja huomasi nopeasti, ett? h?nt? kiehtoo erityisesti palvelu ja asiakkaiden kohtaaminen.",
-            "H?n muutti my?s Nizzaan ja liittyi Le Negrescoon, ty?skennellen hotellin ravintoloissa, erityisesti Le Chanteclerissa. Siell? ranskalaiset ja suomalaiset polut kohtasivat. Arthur tutustui Suomeen ja Kuusamoon tammikuussa 2019. Paikallinen luonto ja el?m?nrytmi tekiv?t vaikutuksen, ja p??t?s rakentaa el?m? Kuusamoon syntyi. Arthur vastaa salista, juomista ja vastaanotosta The French Caf?ssa."
+            "Arthur est originaire de Mardié, près d’Orléans, dans une région connue pour ses châteaux, ses vins et ses vergers. Il s’est orienté très tôt vers l’hôtellerie-restauration. Après des études de cuisine, il a découvert son goût pour le service et le contact avec les clients.",
+            "Arthur s’est ensuite installé à Nice et a travaillé dans les restaurants du Negresco, notamment au Chantecler. C’est là que leurs chemins se sont croisés. Il a découvert la Finlande et Kuusamo en janvier 2019. La nature et le rythme de vie l’ont marqué, et il a décidé de s’y installer. Aujourd’hui, il est responsable de la salle, des boissons et de l’accueil à The French Café."
           ]
         }
       ],
-      visionTitle: "Paikan visio",
+      visionTitle: "Notre vision",
       vision: [
-        "Tavoitteena on kokonaisvaltainen kokemus: huolella paahdettu erikoiskahvi, k?sin tehdyt artesaanileivonnaiset, huomaavainen palvelu ja tila, joka tuntuu elegantilta ja l?mpim?lt?.",
-        "Laatu ja paikallisuus ovat kaiken ytimess?. Suosimme paikallisia raaka-aineita ja suomalaisia kumppaneita, mutta pid?mme identiteetin ranskalaisena. The French Caf? on kahden kulttuurin - ranskalaisen ja suomalaisen - liitto."
+        "Nous voulons réunir un café de spécialité soigneusement torréfié, des pâtisseries artisanales faites à la main et un service attentionné, dans un lieu à la fois élégant et chaleureux.",
+        "La qualité et l’ancrage local guident nos choix. Nous privilégions les ingrédients locaux et les partenaires finlandais, tout en gardant notre identité française. The French Café réunit ces deux cultures."
       ],
-      valuesTitle: "Arvomme",
+      valuesTitle: "Nos valeurs",
       values: [
-        { title: "Tarkkuus", description: "Tarkat ty?vaiheet, hallitut reseptit ja jatkuva laatuun panostaminen." },
-        { title: "Vieraanvaraisuus", description: "Aito vastaanotto, huomaavainen palvelu ja l?mmin kokemus." },
-        { title: "Paikallisuus", description: "Kuusamoon juurtunut talo, jonka taustalla ovat paikalliset tuottajat." }
+        { title: "Précision", description: "Des gestes précis, des recettes maîtrisées et une attention constante à la qualité." },
+        { title: "Hospitalité", description: "Un accueil sincère, un service attentionné et une ambiance chaleureuse." },
+        { title: "Ancrage local", description: "Une maison installée à Kuusamo qui travaille avec les producteurs locaux." }
       ]
     },
     contactPage: {
@@ -508,7 +511,7 @@ export const content: Record<Locale, PageContent> = {
       badge: "Signature house",
       headline: "A signature café & patisserie in Kuusamo",
       subhead: "Fine patisserie, specialty coffee and warm hospitality — a house made for lingering and savoring.",
-      primaryCta: "Reserve a table",
+      primaryCta: "Book brunch",
       secondaryCta: "Explore the menu",
       imageLabel: "The house",
       imageCaption: "Morning light, fresh pastries, gentle tables.",
@@ -759,7 +762,7 @@ export const content: Record<Locale, PageContent> = {
       badge: "Ranskalainen kahvila",
       headline: "Ranskalainen kahvila ja pâtisserie Kuusamossa",
       subhead: "Herkulliset, käsityönä valmistetut leivokset, erikoiskahvit ja lämmin tunnelma - kahvila, missä viihdytään.",
-      primaryCta: "Varaa pöytä",
+      primaryCta: "Varaa brunssi",
       secondaryCta: "Tutustu menuun",
       imageLabel: "Notre maison",
       imageCaption: "Aamun valo, tuoreet leivonnaiset, lempeä tila.",
